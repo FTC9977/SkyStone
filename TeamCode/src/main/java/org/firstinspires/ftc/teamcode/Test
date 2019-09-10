@@ -1,0 +1,52 @@
+This is a test File created on the students Android studio laptop.
+
+Purpose is to demonstrate to the student how to create new files, add them to GitHub repo,
+and push it using VCS tools within AS.
+
+
+Steps taken.
+
+1. Expand TeamCode directory
+2. Highlight the "org.firstinspires.ftc.teamcode"  Right clikc and select New --> File
+
+    - This will create this test text file you see here.
+
+3. Enter in some text into the file.
+4. Now the student needs to "Commit and Push" the new text file to GitHub, by doiung the following:
+
+    a. Select VCS --> Commit
+
+
+5. A new Pop-up Window appears.  A directory tree will also apeear, and you should see "FtcRobotController and TeamCode" listed
+   with check marks next to everything except "Unprovisioned Files"
+
+6. In the "Comment Message" field, enter in some descriptive text of what this Commit/Push is for.
+7. In the lower right corner, you will see the "Commit" button.  Hover your mouse button over it, and change it to "Commit & Push"
+8. A new Pop-up Window appears,  Accept the Defaults and select "PUSH"
+9. When successfully completed, you should see a message int he lower left corner, something like this:
+
+    "(x) Files committed:  Test File created by <github userID>.  This should be saved into <branch-name>
+
+
+Commit/Push Verification:
+----------------------------
+
+1. Open a web browser and go to github.com
+2. Login with your credentials accordingly
+3. Open the shared repository
+4. Click on "Branch:Master", and look for the new branch created earlier (should be the students branch name).  Select the students branch
+   with the mouse.
+
+5. Navigate to TeamCode --> Java directory and verify your text file is now displayed.
+6. Click on the file to view the file and verify its contents
+7. Done.
+
+
+Note:
+----
+
+Even though you have "Committed & Pushed" your Java Code to Github, there is still a review process that is required before your code
+changes are applied in the competition MASTER code base.   At this point, you only have updated your individual branch, not the teams
+MASTER branch, that the competition code will be built from.
+
+This review is done by the github admins.
