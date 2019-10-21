@@ -22,7 +22,7 @@ import org.firstinspires.ftc.teamcode.DriveTrain.*;
 public class TestAS extends LinearOpMode {
 
     // Declare Hardware
-    csHardwareMap robot2 = new csHardwareMap();
+    skyHardwareMap robot2 = new skyHardwareMap();
     ElapsedTime runtime = new ElapsedTime();
 
     //Create IMU Instance

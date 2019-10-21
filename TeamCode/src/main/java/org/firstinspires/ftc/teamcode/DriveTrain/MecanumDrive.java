@@ -1,18 +1,15 @@
 package org.firstinspires.ftc.teamcode.DriveTrain;
 
-import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorController;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.teamcode.AutonomousData;
 import org.firstinspires.ftc.teamcode.Navigation.RevHubIMU;
 import org.firstinspires.ftc.teamcode.HardwareMap.MRGyro;
-import com.qualcomm.hardware.modernrobotics.*;
 
-import org.firstinspires.ftc.teamcode.HardwareMap.csHardwareMap;
+import org.firstinspires.ftc.teamcode.HardwareMap.skyHardwareMap;
 // import org.firsnspires.ftc.teamcode.FieldMapping.FieldElement;
 // import org.firstinspires.ftc.teamcode.FieldMapping.Vector;
 
@@ -36,6 +33,7 @@ public class MecanumDrive {
     //Declare Hardware
     //ssHardwareMap robot2 = new ssHardwareMap();
 
+    skyHardwareMap robot2 = new skyHardwareMap();
 
     // Motor Definitions
     public DcMotor DriveLeftFront;
@@ -81,6 +79,7 @@ public MecanumDrive(DcMotor LF, DcMotor LR, DcMotor RF, DcMotor RR, RevHubIMU hu
     //robotPos = new Vector(0,0);     // Set the default position of the robot.  Used later in AS Mode
     robotAngle = 0;                 // Set the default angle of the robot. Used Later in AS Mode
 
+    robot2.DriveLeftFront = LF;
     DriveLeftFront = LF;
     DriveLeftRear = LR;
     DriveRightFront = RF;

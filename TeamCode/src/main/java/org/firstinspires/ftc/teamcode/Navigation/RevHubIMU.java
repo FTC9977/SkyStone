@@ -9,7 +9,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.teamcode.DriveTrain.PIDController;
-import org.firstinspires.ftc.teamcode.HardwareMap.csHardwareMap;
+import org.firstinspires.ftc.teamcode.HardwareMap.skyHardwareMap;
 
 
 import java.util.Locale;
@@ -21,7 +21,8 @@ import static java.lang.Thread.sleep;
 
 
 public class RevHubIMU {
-    public csHardwareMap hardware;
+
+    public skyHardwareMap hardware;
       private BNO055IMU imu;
       PIDController pidRotate, pidDrive;
       public double globalAngle, correction, power;
