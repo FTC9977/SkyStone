@@ -39,7 +39,7 @@ import com.qualcomm.robotcore.hardware.ServoImplEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.HardwareMap.skyHardwareMap;
 import org.openftc.revextensions2.ExpansionHubServo;
-
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 
 /*
 
@@ -47,41 +47,25 @@ This is a simple program that will use the REV Robotics BlinkedIN Controller
 
 - We will be using the 5V Addressable LED strips
 
-- YOu need to use the PWM signal from a servo port in order to controll which LED pattern
-  you want displayed
  */
 @TeleOp(name = "LED Test", group = "CS9977")
-//@Autonomous(name = "LED Test", group = "CS9977")
+
 //@Disabled
 
 public class blinkedIN extends LinearOpMode {
 
-
-    // Declare Hardare Mappings
-    //skyHardwareMap robot2 = new skyHardwareMap();
-    //ElapsedTime runtime = new ElapsedTime();
+     RevBlinkinLedDriver blinkinLedDriver;
+     RevBlinkinLedDriver.BlinkinPattern pattern;
 
 
-    // Define class members
-    //ServoImplEx servo;  // We will use this to Controll the Rev BlinkedIN LED controller via PWM Signals
-    //PwmControl.PwmRange range = new PwmControl.PwmRange(1005, 1999);
-
-
-    // This section is for the Rev Extensions 2 Module Testing
-
-    ExpansionHubServo servo;
-
-
-    @Override
+ @Override
     public void runOpMode() {
 
+        blinkinLedDriver = hardwareMap.get(RevBlinkinLedDriver.class, "lights");
+        pattern = RevBlinkinLedDriver.BlinkinPattern.AQUA;
 
-        // This section is specific to to BlinkedIN'
 
-        servo = (ExpansionHubServo) hardwareMap.servo.get("lights");    // This is an example using Rev Extensions2 modules
 
-        //servo = hardwareMap.get(ServoImplEx.class, "lights"); // Commented out after incorportating into skyHardwaremap.java file
-        //servo.setPwmRange(range);                                        // Commented out after incorportating into skyHardwaremap.java file
 
         // Wait for the start button
 
@@ -90,43 +74,19 @@ public class blinkedIN extends LinearOpMode {
 
 
             // This section contains sample code that is from here:
-            // https://github.com/OpenFTC/RevExtensions2/blob/master/examples/src/main/java/org/openftc/revextensions2/examples/ServoPulseWidthExample.java
+            https://github.com/ftctechnh/ftc_app/blob/master/FtcRobotController/src/main/java/org/firstinspires/ftc/robotcontroller/external/samples/SampleRevBlinkinLedDriver.java
 
 
-            servo.setPwmEnable();           // Important:  Make sure the servo is enable, otherwise setPulseWidUs() will not work
-            servo.setPulseWidthUs(1795);    // Set to DarkRed = 1795 uS
-            sleep(10000);       // set Dark Red to show for 10sec
-
-
-
-
-
-         /*   Commenting the following sections as a test of the Expansionhun Extensions 2 Module
-            // Set to Dark RED
-            PwmControl.PwmRange DarkRed = new PwmControl.PwmRange(1795,1795);
-            servo.setPwmRange(DarkRed);
+            blinkinLedDriver.setPattern(pattern);
             sleep(5000);
 
-            // Set to to Gold
-            PwmControl.PwmRange Gold = new PwmControl.PwmRange(1835, 1835);
-            servo.setPwmRange(Gold);
+            blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.TWINKLES_RAINBOW_PALETTE);
             sleep(5000);
-
-            // Set to Dark Green
-            PwmControl.PwmRange DarkGreen = new PwmControl.PwmRange(1875, 1875);
-            servo.setPwmRange(DarkGreen);
-            sleep(5000);
-
-            //Set tp Dark Blue
-            PwmControl.PwmRange DarkBlue = new PwmControl.PwmRange(1925, 1925);
-            servo.setPwmRange(DarkBlue);
-            sleep(5000);
-
 
         }
 
 
-        */
+
         }
     }
-}
+
