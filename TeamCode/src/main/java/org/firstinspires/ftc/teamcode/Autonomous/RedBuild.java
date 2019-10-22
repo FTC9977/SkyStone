@@ -80,7 +80,7 @@ public class RedBuild extends LinearOpMode {
         parameters.mode = BNO055IMU.SensorMode.IMU;
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.calibrationDataFile = "AdafruitIMUCalibration.json";
+        parameters.calibrationDataFile = "BNO055IMUCalibration.json";
         parameters.loggingEnabled = false;
 
         // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
