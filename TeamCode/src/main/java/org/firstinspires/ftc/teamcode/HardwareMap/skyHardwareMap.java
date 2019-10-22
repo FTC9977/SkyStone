@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.HardwareMap;
 
 import com.qualcomm.hardware.lynx.LynxI2cColorRangeSensor;
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
@@ -19,7 +20,7 @@ import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import com.qualcomm.robotcore.util.ReadWriteFile;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 
 
 import java.io.File;
@@ -58,9 +59,11 @@ public class skyHardwareMap {
     private DcMotor motor;
 
 
-    // PWM Signals for Rev Robotics BlinkedIN 5v Addressable LED strips
-    public ServoImplEx LED;
-    PwmControl.PwmRange range = new PwmControl.PwmRange(1005, 1995);  // LED uSec Ranges from 1005uS to 1995uSec
+    // Rev Robotics blinkIN LED Driver.
+
+    public RevBlinkinLedDriver blinkinLedDriver = null;
+    public RevBlinkinLedDriver.BlinkinPattern pattern = null;
+
 
 
     // Servo Constants

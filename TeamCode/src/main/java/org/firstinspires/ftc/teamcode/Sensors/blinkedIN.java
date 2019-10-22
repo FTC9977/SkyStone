@@ -80,7 +80,7 @@ public class blinkedIN extends LinearOpMode {
             blinkinLedDriver.setPattern(pattern);
             sleep(5000);
 
-            blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.TWINKLES_RAINBOW_PALETTE);
+            blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.TWINKLES_RAINBOW_PALETTE);    // Here you can change the pattern to any one of the available color options for the 5V addressable LED strips
             sleep(5000);
 
         }
