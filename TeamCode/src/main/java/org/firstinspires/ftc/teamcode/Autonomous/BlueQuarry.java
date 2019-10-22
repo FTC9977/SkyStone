@@ -64,6 +64,15 @@ public class BlueQuarry extends LinearOpMode {
      robot2.blinkinLedDriver.setPattern(pattern);
      robot2.pattern = RevBlinkinLedDriver.BlinkinPattern.TWINKLES_RAINBOW_PALETTE;
 
+     /* Use this section to write the steps for Autonomous Movements
+     *
+     *  things we should include here are:
+     *      1. Motor Movements
+     *      2. Vision Detection via TensorFlow, VuForia, DodgeCV (depending on what we decide to use)
+     *      3. Sensor input/output  (Color Sensors, Distance Sensors, Limit Switches, etc..)
+     *      4. Navigation Utilities (as needed)
+     */
+
 
      PIDDriveStrafeRight(1,0,48);    // Strafe Right at full power,  0 Deg angle, 48" Distance -- TEST ONLY not for Competition
      PIDDriveForward(1, 0, 48);      // Drive Forward at full power, 0 Deg angle, 40" Distance -- TEST ONLY not for Competition
