@@ -12,6 +12,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.AutonomousData;
+import org.firstinspires.ftc.teamcode.DriveTrain.Encoder;
 import org.firstinspires.ftc.teamcode.DriveTrain.PIDController;
 import org.firstinspires.ftc.teamcode.HardwareMap.skyHardwareMap;
 
@@ -54,14 +55,14 @@ public class BlueBuild extends LinearOpMode {
      robot2.init(hardwareMap);
      setupIMU();
 
-     telemetry.addData("Mode ", "Waiting for start");
-     telemetry.addData("imu calibrations status", imu.getCalibrationStatus().toString());
-     telemetry.update();
+
+     waitForStart();
+
 
 
      // Set the Initial; Blinkin Color Schema to Aqua (Represents CS9977 Team Colors
-     robot2.blinkinLedDriver.setPattern(pattern);
-     robot2.pattern = RevBlinkinLedDriver.BlinkinPattern.TWINKLES_RAINBOW_PALETTE;
+     //robot2.blinkinLedDriver.setPattern(pattern);
+     //robot2.pattern = RevBlinkinLedDriver.BlinkinPattern.TWINKLES_RAINBOW_PALETTE;
 
      /* Use this section to write the steps for Autonomous Movements
       *
@@ -73,9 +74,16 @@ public class BlueBuild extends LinearOpMode {
       */
 
 
-     PIDDriveStrafeRight(1,0,48);    // Strafe Right at full power,  0 Deg angle, 48" Distance -- TEST ONLY not for Competition
-     PIDDriveForward(1, 0, 48);      // Drive Forward at full power, 0 Deg angle, 40" Distance -- TEST ONLY not for Competition
-     PIDDrivebackward(1,0,48);       // Drive Backward  at full power, 0 Deg angle, 48" Distance -- TEST ONLY not for Competition
+     PIDDriveForward(1,90,48);      // Drive Forward at full power, 0 Deg angle, 40" Distance -- TEST ONLY not for Competition
+
+
+
+
+
+
+     //PIDDriveStrafeRight(1,90,48);    // Strafe Right at full power,  0 Deg angle, 48" Distance -- TEST ONLY not for Competition
+     //PIDDriveForward(1, 90, 48);      // Drive Forward at full power, 0 Deg angle, 40" Distance -- TEST ONLY not for Competition
+     //PIDDrivebackward(1,90,48);       // Drive Backward  at full power, 0 Deg angle, 48" Distance -- TEST ONLY not for Competition
 
      //  At this point of the testing, the robot should be back against the wall.   Any margin of error, means we need to tune the PID values
 
@@ -183,6 +191,7 @@ public class BlueBuild extends LinearOpMode {
         pidDrive.setInputRange(-angle, angle);
         pidDrive.enable();
 
+
         // Use PID with imu input to drive in a straight line.
         double correction = pidDrive.performPID(getAngle2());
 
@@ -197,6 +206,28 @@ public class BlueBuild extends LinearOpMode {
         robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+
+
+        /* Setup Default Robot Position...  setTargetPosition= null
+         *  This section was added after our initial attempts to re-use these
+         *  PID controls failed.   Error message on the DS phone indicated
+         *  we needed to setTargetPostion before running to position
+         *
+         *  I am adding this is a test, to see if we initialize the defauly
+         *  position to 0 (robot against the wall), knowing that we will re-calculate the positon
+         *  later in this method.
+         *
+         *  For competition, we will need to be more accurate, most likely.
+         */
+
+        robot2.DriveRightFront.setTargetPosition(0);
+        robot2.DriveRightRear.setTargetPosition(0);
+        robot2.DriveLeftFront.setTargetPosition(0);
+        robot2.DriveLeftRear.setTargetPosition(0);
+
+
+
+
         // Set RUN_TO_POSITION
         robot2.DriveRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         robot2.DriveLeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -205,7 +236,6 @@ public class BlueBuild extends LinearOpMode {
         sleep(500);
 
         // Stop Motors and set Motor Power to 0
-        //PIDstopALL();
         robot2.DriveRightFront.setPower(0);
         robot2.DriveLeftFront.setPower(0);
         robot2.DriveRightRear.setPower(0);

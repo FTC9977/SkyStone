@@ -138,7 +138,7 @@ public class skyHardwareMap {
 
 
         // Define any Limit Switces used for Control
-        limitswClawBracket = hwMap.digitalChannel.get("claw");
+        //limitswClawBracket = hwMap.digitalChannel.get("claw");  // 10/23/19  Commented out to test AS. Uncommet this out when switch is added
 
 
         //------------------------------------------------------------
