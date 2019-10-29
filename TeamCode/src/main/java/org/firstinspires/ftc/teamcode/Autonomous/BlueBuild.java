@@ -16,10 +16,39 @@ import org.firstinspires.ftc.teamcode.DriveTrain.Encoder;
 import org.firstinspires.ftc.teamcode.DriveTrain.PIDController;
 import org.firstinspires.ftc.teamcode.HardwareMap.skyHardwareMap;
 
-//
+/* 10/29/19 - Good Lesson Learned here....
+*
+*   "Even the seasoned Programmer/Engineer can sometimes forget the basics....."
+*
+*  Problem:  When we executed this code, it threw an error indicating that we needed to
+*            setTargetPosition() before engaging the setMode(DcMotor.RunMode.RUN_TO_POSITION)
+*
+*  Troubleshooting:
+*     We attempted many things, including:
+*           1. Complete reconfigure of the RC Configuration file
+*           2. manually adding the setTargetPosition(0) within the method
+*           3. Manipulate a known working PIDDrieForward() method used in the 2018 State Comps
+*
+*  Resolution:
+*       Caleb to the rescue!   He discovered the following code segment was wrong, corrected it and
+*       all the errors went away, robot exeuted the commands without issue and worked perfectly.
+*
+*  Wrong Command:
+*       @Autonomous(name="Blue Build, group=AutonomousData.OFFICIAL_GROUP)
+*
+*  Corrected Command:
+*       @Autonomous(name="Blue Build", group = "CS9977-test")
+*
+*  Summary:
+*       The group= " " statement should be named the same as the Robot Controller Config Name on the phone.
+*
+*        The AutonomousData.OFFICIAL_GROUP was ported from the 2018 season, and was not properly functioning.   We will delete it
+*        and or correct that file contents to match the 2019-20 SkyStone Season parameters.
+*
+ */
 
 
-@Autonomous(name="Blue Build", group = AutonomousData.OFFICIAL_GORUP)
+@Autonomous(name="Blue Build", group = "CS9977-test")
 
 public class BlueBuild extends LinearOpMode {
 
@@ -74,18 +103,18 @@ public class BlueBuild extends LinearOpMode {
       */
 
 
-     PIDDriveForward(1,90,48);      // Drive Forward at full power, 0 Deg angle, 40" Distance -- TEST ONLY not for Competition
+     PIDDriveForward(1,90,24);      // Drive Forward at full power, 0 Deg angle, 40" Distance -- TEST ONLY not for Competition
+     PIDDriveStrafeLeft(1,90,24);
+     sleep(500);
+     PIDDriveStrafeRight(1,90,24);
+     sleep(500);
+     PIDDrivebackward(1,90,24);
 
-
-
-
-
-
-     //PIDDriveStrafeRight(1,90,48);    // Strafe Right at full power,  0 Deg angle, 48" Distance -- TEST ONLY not for Competition
-     //PIDDriveForward(1, 90, 48);      // Drive Forward at full power, 0 Deg angle, 40" Distance -- TEST ONLY not for Competition
-     //PIDDrivebackward(1,90,48);       // Drive Backward  at full power, 0 Deg angle, 48" Distance -- TEST ONLY not for Competition
 
      //  At this point of the testing, the robot should be back against the wall.   Any margin of error, means we need to tune the PID values
+     //
+     // 10/29/19  -   Above PID drive functions worked, and should be good for Merging into the Competition Software Release
+
 
 
  } // Ends runOpMode
@@ -186,6 +215,7 @@ public class BlueBuild extends LinearOpMode {
 
         // Setup Straight Line Driving
 
+
         pidDrive.setSetpoint(0);
         pidDrive.setOutputRange(0, speed);
         pidDrive.setInputRange(-angle, angle);
@@ -220,11 +250,13 @@ public class BlueBuild extends LinearOpMode {
          *  For competition, we will need to be more accurate, most likely.
          */
 
-        robot2.DriveRightFront.setTargetPosition(0);
-        robot2.DriveRightRear.setTargetPosition(0);
-        robot2.DriveLeftFront.setTargetPosition(0);
-        robot2.DriveLeftRear.setTargetPosition(0);
+        //robot2.DriveRightFront.setTargetPosition(0);
+        //robot2.DriveRightRear.setTargetPosition(0);
+        //robot2.DriveLeftFront.setTargetPosition(0);
+        //robot2.DriveLeftRear.setTargetPosition(0);
 
+        telemetry.addLine("Just setTarget Position");
+        telemetry.update();
 
 
 
@@ -233,6 +265,9 @@ public class BlueBuild extends LinearOpMode {
         robot2.DriveLeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         robot2.DriveRightRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         robot2.DriveLeftRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        telemetry.addLine("Set RUN_TO_POS");
+        telemetry.update();
         sleep(500);
 
         // Stop Motors and set Motor Power to 0

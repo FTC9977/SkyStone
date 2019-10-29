@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.HardwareMap.skyHardwareMap;
 //
 
 
-@Autonomous(name="Red Quarry", group = AutonomousData.OFFICIAL_GORUP)
+@Autonomous(name="Red Quarry", group = "CS9977-test")
 
 public class RedQuarry extends LinearOpMode {
 

@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.HardwareMap.skyHardwareMap;
 //
 
 
-@Autonomous(name="Red Build", group = AutonomousData.OFFICIAL_GORUP)
+@Autonomous(name="Red Build", group = "CS9977-test")
 
 public class RedBuild extends LinearOpMode {
 

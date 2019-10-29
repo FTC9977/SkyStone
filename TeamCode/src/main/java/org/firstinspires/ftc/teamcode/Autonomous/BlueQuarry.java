@@ -19,7 +19,7 @@ import org.firstinspires.ftc.teamcode.HardwareMap.skyHardwareMap;
 
 
 
-@Autonomous(name="Blue Quarry", group = AutonomousData.OFFICIAL_GORUP)
+@Autonomous(name="Blue Quarry", group = "CS9977-test")
 
 public class BlueQuarry extends LinearOpMode {
 
