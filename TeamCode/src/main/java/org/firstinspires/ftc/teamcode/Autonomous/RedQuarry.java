@@ -54,6 +54,15 @@ public class RedQuarry extends LinearOpMode {
      robot2.init(hardwareMap);
      setupIMU();
 
+     // This chunk of code gets around the Motorola E4 Disconnect bug.  Should be fixed in SDK 5.3, but adding it as a "backup - JUST IN CASE!!!"
+     //
+     while (!opModeIsActive() && !isStopRequested()) {
+         telemetry.addData("status", "waiting for start command...");
+         telemetry.update();
+     }
+
+
+
      telemetry.addData("Mode ", "Waiting for start");
      telemetry.addData("imu calibrations status", imu.getCalibrationStatus().toString());
      telemetry.update();

@@ -31,6 +31,12 @@ public void runOpMode() throws InterruptedException {
     rightFrontWheel = hardwareMap.dcMotor.get(UniversalConstants.RIGHT1NAME);
     rightBackWheel = hardwareMap.dcMotor.get(UniversalConstants.RIGHTNAME2);
 
+    // This chunk of code gets around the Motorola E4 Disconnect bug.  Should be fixed in SDK 5.3, but adding it as a "backup - JUST IN CASE!!!"
+    //
+    while (!opModeIsActive() && !isStopRequested()) {
+        telemetry.addData("status", "waiting for start command...");
+        telemetry.update();
+    }
 
     waitForStart();
 

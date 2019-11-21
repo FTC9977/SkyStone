@@ -13,6 +13,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.AutonomousData;
 import org.firstinspires.ftc.teamcode.DriveTrain.Encoder;
+import org.firstinspires.ftc.teamcode.DriveTrain.MecanumDrive;
 import org.firstinspires.ftc.teamcode.DriveTrain.PIDController;
 import org.firstinspires.ftc.teamcode.HardwareMap.skyHardwareMap;
 
@@ -57,6 +58,7 @@ public class BlueBuild extends LinearOpMode {
 
     skyHardwareMap robot2 = new skyHardwareMap();
     ElapsedTime runtime = new ElapsedTime();
+    MecanumDrive mecanum;
 
     // Created Rev Robotics BlinkIN instances
 
@@ -85,6 +87,14 @@ public class BlueBuild extends LinearOpMode {
      setupIMU();
 
 
+
+     // This chunk of code gets around the Motorola E4 Disconnect bug.  Should be fixed in SDK 5.3, but adding it as a "backup - JUST IN CASE!!!"
+     //
+     while (!opModeIsActive() && !isStopRequested()) {
+         telemetry.addData("status", "waiting for start command...");
+         telemetry.update();
+     }
+
      waitForStart();
 
 
@@ -103,7 +113,11 @@ public class BlueBuild extends LinearOpMode {
       */
 
 
-     PIDDriveForward(1,90,24);      // Drive Forward at full power, 0 Deg angle, 40" Distance -- TEST ONLY not for Competition
+     //  At this point of the testing, the robot should be back against the wall.   Any margin of error, means we need to tune the PID values
+     //
+     // 10/29/19  -   Above PID drive functions worked, and should be good for Merging into the Competition Software Release
+
+     PIDDriveForward(1,90,24);      // Drive Forward at full power, 90 Deg angle, 40" Distance -- TEST ONLY not for Competition
      PIDDriveStrafeLeft(1,90,24);
      sleep(500);
      PIDDriveStrafeRight(1,90,24);
@@ -111,9 +125,17 @@ public class BlueBuild extends LinearOpMode {
      PIDDrivebackward(1,90,24);
 
 
-     //  At this point of the testing, the robot should be back against the wall.   Any margin of error, means we need to tune the PID values
-     //
-     // 10/29/19  -   Above PID drive functions worked, and should be good for Merging into the Competition Software Release
+     /*
+     *    Test the following statement below.
+     *
+     * Purpose:
+     *   This will call the MecanumDrive.java file, were I have all the Mecanum Methods stored.  If this works, then we can eliminate these same methods in the AS Program, cleaning it up.
+     *   It will also provide us a way to make changes just to the MecanumDrive.java file vesus altering 4 or more AS programs, lowering the chances of errors or ommissions.
+     *
+     * End Result:   Our AS programs will be come very small, and if we need to re-write code at a competition, it should be simple and fast.
+
+      */
+     mecanum.PIDDriveForward(1,90,24);   //   10/29/19   Test this to see if we can reference
 
 
 
