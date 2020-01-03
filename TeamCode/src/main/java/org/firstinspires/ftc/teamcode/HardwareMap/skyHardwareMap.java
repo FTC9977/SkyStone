@@ -55,6 +55,8 @@ public class skyHardwareMap {
     public DcMotor DriveLeftRear = null;
     public DcMotor DriveRightFront = null;
     public DcMotor DriveRightRear = null;
+    public DcMotor LiftLeft        = null;
+    public DcMotor LiftRight       = null;
 
     private DcMotor motor;
 
@@ -113,16 +115,24 @@ public class skyHardwareMap {
         DriveLeftRear = hwMap.dcMotor.get("LR");
         DriveRightFront = hwMap.dcMotor.get("RF");
         DriveRightRear = hwMap.dcMotor.get("RR");
+        LiftLeft        = hwMap.dcMotor.get("LiftL");
+        LiftRight       = hwMap.dcMotor.get("LiftR");
 
         DriveRightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         DriveRightRear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         DriveLeftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         DriveLeftRear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+        LiftLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        LiftRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
         DriveLeftFront.setDirection(DcMotorSimple.Direction.FORWARD);
         DriveLeftRear.setDirection(DcMotorSimple.Direction.FORWARD);
         DriveRightRear.setDirection(DcMotorSimple.Direction.REVERSE);
         DriveRightFront.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        LiftLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        LiftRight.setDirection(DcMotorSimple.Direction.FORWARD);
 
 
 
@@ -131,6 +141,9 @@ public class skyHardwareMap {
         DriveRightRear.setPower(0);
         DriveLeftFront.setPower(0);
         DriveLeftRear.setPower(0);
+
+        LiftLeft.setPower(0);
+        LiftRight.setPower(0);
 
         // Add Any additional DC Motor Definitions for SkyStone Below
         // Example:  LANDERHOOK = hwMap.dcMotor.get("hook");
