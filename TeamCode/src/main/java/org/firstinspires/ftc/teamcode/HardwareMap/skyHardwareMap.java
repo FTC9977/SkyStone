@@ -22,6 +22,8 @@ import com.qualcomm.robotcore.util.ReadWriteFile;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 
+import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 
 import java.io.File;
 import java.util.Locale;
@@ -66,6 +68,9 @@ public class skyHardwareMap {
     public RevBlinkinLedDriver blinkinLedDriver = null;
     public RevBlinkinLedDriver.BlinkinPattern pattern = null;
 
+   // REV Robotics Color Sensor/Distance Sensor V3
+    public ColorSensor sensorColor = null;
+    public DistanceSensor sensorDistance = null;
 
 
     // Servo Constants
@@ -147,6 +152,7 @@ public class skyHardwareMap {
 
         // Add Any additional DC Motor Definitions for SkyStone Below
         // Example:  LANDERHOOK = hwMap.dcMotor.get("hook");
+
 
 
 
