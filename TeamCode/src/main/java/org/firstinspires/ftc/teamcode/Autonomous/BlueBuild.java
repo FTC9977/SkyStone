@@ -49,7 +49,7 @@ import org.firstinspires.ftc.teamcode.HardwareMap.skyHardwareMap;
  */
 
 
-@Autonomous(name="Blue Build", group = "CS9977-test")
+@Autonomous(name="Blue Build", group = "calebs_robot")
 
 public class BlueBuild extends LinearOpMode {
 
@@ -75,8 +75,8 @@ public class BlueBuild extends LinearOpMode {
 
     //Define Drivetrain Variabeles
 
-    static final double COUNTS_PER_MOTOR_REV = 1120;   // Andymark 40 Motor Tick Count
-    static final double DRIVE_GEAR_REDUCTION = 1.5;    // This is > 1.0 if motors are geared up ____  Using OVerdrive gearing with Pico Uno boxes  40 gear to 35 gear over-drive
+    static final double COUNTS_PER_MOTOR_REV = 753.2;   // Andymark 40 Motor Tick Count
+    static final double DRIVE_GEAR_REDUCTION = .69;    // This is > 1.0 if motors are geared up ____  Using OVerdrive gearing with Pico Uno boxes  40 gear to 35 gear over-drive
     static final double WHEEL_DIAMETER_INCHES = 4.0;   // For figuring out circumfrance
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
 
@@ -117,25 +117,25 @@ public class BlueBuild extends LinearOpMode {
      //
      // 10/29/19  -   Above PID drive functions worked, and should be good for Merging into the Competition Software Release
 
-     PIDDriveForward(1,90,24);      // Drive Forward at full power, 90 Deg angle, 40" Distance -- TEST ONLY not for Competition
-     PIDDriveStrafeLeft(1,90,24);
-     sleep(500);
-     PIDDriveStrafeRight(1,90,24);
-     sleep(500);
-     PIDDrivebackward(1,90,24);
+     //PIDDriveForward(.5,0,12);  // Drive Forward @ 50% power, 0 degrees, 12"  -- Use this to test whether we need 0 or 90 degrees!!!
 
 
-     /*
-     *    Test the following statement below.
-     *
-     * Purpose:
-     *   This will call the MecanumDrive.java file, were I have all the Mecanum Methods stored.  If this works, then we can eliminate these same methods in the AS Program, cleaning it up.
-     *   It will also provide us a way to make changes just to the MecanumDrive.java file vesus altering 4 or more AS programs, lowering the chances of errors or ommissions.
-     *
-     * End Result:   Our AS programs will be come very small, and if we need to re-write code at a competition, it should be simple and fast.
+     //PIDDriveForward(.5,90,12);  // Drive Foward @ 50% power, 90 degrees, 12"
+     //PIDDriveForward(.75,90,24); // Drive Forward @ 75% power, 90 degrees, 24"
+     //PIDDriveForward(1,90,24); // Drive Forward at 100% power, 90 degress, 24"
 
-      */
-     mecanum.PIDDriveForward(1,90,24);   //   10/29/19   Test this to see if we can reference
+     //PIDDrivebackward(.5,90,12); //Drive Backward @ 50% power, 90 degrees, 12"
+     //PIDDrivebackward(.75, 90, 24); //Drive backward @ 75% power, 90 degrees, 24"
+     //PIDDrivebackward(1, 90, 24); //Drive backward @100% power, 90 degrees, 24"
+
+     //PIDDriveStrafeRight(.50, 90, 12); //strafe right @ 50% power, 90 degrees, 12"
+     //PIDDriveStrafeRight(.75, 90, 24); //strafe right @ 75% power, 90 degrees, 24"
+     //PIDDriveStrafeRight(1, 90, 24); //strafe right @ 100% power, 90 degrees, 24"
+
+     PIDDriveStrafeLeft(.50, 90, 12); //strafe left @ 50% power, 90 degrees, 12"
+     //PIDDriveStrafeLeft(.75, 90, 24); //strafe left @ 75% power, 90 degrees, 24"
+     //PIDDriveStrafeLeft(1,90, 24); //strafe left @ 100% power, 90 degrees, 24"
+
 
 
 
@@ -272,10 +272,10 @@ public class BlueBuild extends LinearOpMode {
          *  For competition, we will need to be more accurate, most likely.
          */
 
-        //robot2.DriveRightFront.setTargetPosition(0);
-        //robot2.DriveRightRear.setTargetPosition(0);
-        //robot2.DriveLeftFront.setTargetPosition(0);
-        //robot2.DriveLeftRear.setTargetPosition(0);
+        robot2.DriveRightFront.setTargetPosition(0);
+        robot2.DriveRightRear.setTargetPosition(0);
+        robot2.DriveLeftFront.setTargetPosition(0);
+        robot2.DriveLeftRear.setTargetPosition(0);
 
         telemetry.addLine("Just setTarget Position");
         telemetry.update();
@@ -368,6 +368,11 @@ public class BlueBuild extends LinearOpMode {
         robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+        robot2.DriveRightFront.setTargetPosition(0);
+        robot2.DriveRightRear.setTargetPosition(0);
+        robot2.DriveLeftFront.setTargetPosition(0);
+        robot2.DriveLeftRear.setTargetPosition(0);
+
         // Set RUN_TO_POSITION
         robot2.DriveRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         robot2.DriveLeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -452,6 +457,11 @@ public class BlueBuild extends LinearOpMode {
         robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        robot2.DriveRightFront.setTargetPosition(0);
+        robot2.DriveRightRear.setTargetPosition(0);
+        robot2.DriveLeftFront.setTargetPosition(0);
+        robot2.DriveLeftRear.setTargetPosition(0);
 
         // Set RUN_TO_POSITION
         robot2.DriveRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -539,6 +549,11 @@ public class BlueBuild extends LinearOpMode {
         robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+        robot2.DriveRightFront.setTargetPosition(0);
+        robot2.DriveRightRear.setTargetPosition(0);
+        robot2.DriveLeftFront.setTargetPosition(0);
+        robot2.DriveLeftRear.setTargetPosition(0);
+
         // Set RUN_TO_POSITION
         robot2.DriveRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         robot2.DriveLeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -558,10 +573,10 @@ public class BlueBuild extends LinearOpMode {
 
 
         // Set Target
-        robot2.DriveRightFront.setTargetPosition((int) -InchesMoving);
-        robot2.DriveLeftFront.setTargetPosition((int) InchesMoving);
-        robot2.DriveRightRear.setTargetPosition((int) InchesMoving);
-        robot2.DriveLeftRear.setTargetPosition((int) -InchesMoving);
+        robot2.DriveRightFront.setTargetPosition((int) InchesMoving);
+        robot2.DriveLeftFront.setTargetPosition((int) -InchesMoving);
+        robot2.DriveRightRear.setTargetPosition((int) -InchesMoving);
+        robot2.DriveLeftRear.setTargetPosition((int) InchesMoving);
 
 
         while (robot2.DriveRightFront.isBusy() && robot2.DriveRightRear.isBusy()
@@ -570,7 +585,7 @@ public class BlueBuild extends LinearOpMode {
 
             //Set Motor Power  - This engages the Motors and starts the robot movements
             robot2.DriveRightFront.setPower(speed);
-            robot2.DriveLeftFront.setPower(speed);
+            robot2.DriveLeftFront.setPower(speed + correction);
             robot2.DriveRightRear.setPower(speed + correction);
             robot2.DriveLeftRear.setPower(speed);
         }    // This brace closes out the while loop
@@ -626,6 +641,11 @@ public class BlueBuild extends LinearOpMode {
         robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+        robot2.DriveRightFront.setTargetPosition(0);
+        robot2.DriveRightRear.setTargetPosition(0);
+        robot2.DriveLeftFront.setTargetPosition(0);
+        robot2.DriveLeftRear.setTargetPosition(0);
+
         // Set RUN_TO_POSITION
         robot2.DriveRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         robot2.DriveLeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -645,10 +665,10 @@ public class BlueBuild extends LinearOpMode {
 
 
         // Set Target
-        robot2.DriveRightFront.setTargetPosition((int) InchesMoving);
-        robot2.DriveLeftFront.setTargetPosition((int) -InchesMoving);
-        robot2.DriveRightRear.setTargetPosition((int) -InchesMoving);
-        robot2.DriveLeftRear.setTargetPosition((int) InchesMoving);
+        robot2.DriveRightFront.setTargetPosition((int)- InchesMoving);
+        robot2.DriveLeftFront.setTargetPosition((int) InchesMoving);
+        robot2.DriveRightRear.setTargetPosition((int) InchesMoving);
+        robot2.DriveLeftRear.setTargetPosition((int) -InchesMoving);
 
 
         while (robot2.DriveRightFront.isBusy() && robot2.DriveRightRear.isBusy()
@@ -685,6 +705,11 @@ public class BlueBuild extends LinearOpMode {
         robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         sleep(500);
+
+        robot2.DriveRightFront.setTargetPosition(0);
+        robot2.DriveRightRear.setTargetPosition(0);
+        robot2.DriveLeftFront.setTargetPosition(0);
+        robot2.DriveLeftRear.setTargetPosition(0);
 
         // Set RUN_TO_POSITION
 
@@ -742,6 +767,11 @@ public class BlueBuild extends LinearOpMode {
         robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         sleep(500);
+
+        robot2.DriveRightFront.setTargetPosition(0);
+        robot2.DriveRightRear.setTargetPosition(0);
+        robot2.DriveLeftFront.setTargetPosition(0);
+        robot2.DriveLeftRear.setTargetPosition(0);
 
         // Set RUN_TO_POSITION
 
