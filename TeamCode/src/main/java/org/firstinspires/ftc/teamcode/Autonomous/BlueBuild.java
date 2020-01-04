@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.DriveTrain.Encoder;
 import org.firstinspires.ftc.teamcode.DriveTrain.MecanumDrive;
 import org.firstinspires.ftc.teamcode.DriveTrain.PIDController;
 import org.firstinspires.ftc.teamcode.HardwareMap.skyHardwareMap;
+import org.firstinspires.ftc.teamcode.Sensors.blinkedIN;
 
 /* 10/29/19 - Good Lesson Learned here....
 *
@@ -46,7 +47,8 @@ import org.firstinspires.ftc.teamcode.HardwareMap.skyHardwareMap;
 *        The AutonomousData.OFFICIAL_GROUP was ported from the 2018 season, and was not properly functioning.   We will delete it
 *        and or correct that file contents to match the 2019-20 SkyStone Season parameters.
 *
- */
+*
+*/
 
 
 @Autonomous(name="Blue Build", group = "CS9977-test")
@@ -75,8 +77,8 @@ public class BlueBuild extends LinearOpMode {
 
     //Define Drivetrain Variabeles
 
-    static final double COUNTS_PER_MOTOR_REV = 1120;   // Andymark 40 Motor Tick Count
-    static final double DRIVE_GEAR_REDUCTION = 1.5;    // This is > 1.0 if motors are geared up ____  Using OVerdrive gearing with Pico Uno boxes  40 gear to 35 gear over-drive
+    static final double COUNTS_PER_MOTOR_REV = 753.2;   // Andymark 40 Motor Tick Count
+    static final double DRIVE_GEAR_REDUCTION = 1;    // This is > 1.0 if motors are geared up ____  Using OVerdrive gearing with Pico Uno boxes  40 gear to 35 gear over-drive
     static final double WHEEL_DIAMETER_INCHES = 4.0;   // For figuring out circumfrance
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
 
@@ -117,12 +119,46 @@ public class BlueBuild extends LinearOpMode {
      //
      // 10/29/19  -   Above PID drive functions worked, and should be good for Merging into the Competition Software Release
 
+     // Setup Timer for As mode
+
+
+     // added the LED Signal Codes 12/12/19
+     // Need to Test
+     while (runtime.seconds() > 30) {       // Set LED pattern to GREE; Indicates that were starting/within 30-10 seconds of AS mode
+         pattern = RevBlinkinLedDriver.BlinkinPattern.GREEN;
+         blinkinLedDriver.setPattern(pattern); // Set the LED pattern to GREEN
+
+
+         if (runtime.seconds() < 10) {      // Set LED patterbn to RED;  Indicsates that we are within the last 10 seconds of AS mode.
+             pattern = RevBlinkinLedDriver.BlinkinPattern.RED;
+             blinkinLedDriver.setPattern(pattern);  // SET LED pattern to RED
+         }
+     }
+
+
      PIDDriveForward(1,90,24);      // Drive Forward at full power, 90 Deg angle, 40" Distance -- TEST ONLY not for Competition
      PIDDriveStrafeLeft(1,90,24);
      sleep(500);
      PIDDriveStrafeRight(1,90,24);
      sleep(500);
      PIDDrivebackward(1,90,24);
+
+
+     // This section is a placeholder for Vision Detection of the Skystone
+     //  Methods we can choose from include:
+     //     1. Using REV3 Color/Distance Sensor
+     //     2. Using TensorFlor Vision
+     //     3. Using OpenCV Vision
+
+
+
+     // This second is a placeholder for Moving the Foundation to the build zone corner
+     //  Place frame work here
+
+
+
+     // This is the last placeholder for returning to mid-field to gain the parking points.
+     // Pace framework here.
 
 
      /*
