@@ -4,24 +4,23 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.teamcode.AutonomousData;
 import org.firstinspires.ftc.teamcode.DriveTrain.PIDController;
 import org.firstinspires.ftc.teamcode.HardwareMap.skyHardwareMap;
+
 
 //
 
 
+@Autonomous(name="Red Quarry Park", group = "calebs_robot")
 
-@Autonomous(name="Blue Quarry", group = "CS9977-test")
-
-public class BlueQuarry extends LinearOpMode {
+public class RedQuarryPark extends LinearOpMode {
 
 
     // Decalre hardware
@@ -44,54 +43,52 @@ public class BlueQuarry extends LinearOpMode {
 
     //Define Drivetrain Variabeles
 
-    static final double COUNTS_PER_MOTOR_REV = 1120;   // Andymark 40 Motor Tick Count
-    static final double DRIVE_GEAR_REDUCTION = 1.5;    // This is > 1.0 if motors are geared up ____  Using OVerdrive gearing with Pico Uno boxes  40 gear to 35 gear over-drive
+    static final double COUNTS_PER_MOTOR_REV = 753.2 ;   // Andymark 40 Motor Tick Count
+    static final double DRIVE_GEAR_REDUCTION = 1 ;    // This is > 1.0 if motors are geared up ____  Using OVerdrive gearing with Pico Uno boxes  40 gear to 35 gear over-drive
     static final double WHEEL_DIAMETER_INCHES = 4.0;   // For figuring out circumfrance
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
 
- @Override
- public void runOpMode() throws InterruptedException {
+    @Override
+    public void runOpMode() throws InterruptedException {
 
-     robot2.init(hardwareMap);
-     setupIMU();
+        robot2.init(hardwareMap);
+        setupIMU();
 
 
-     // This chunk of code gets around the Motorola E4 Disconnect bug.  Should be fixed in SDK 5.3, but adding it as a "backup - JUST IN CASE!!!"
-     //
-     while (!opModeIsActive() && !isStopRequested()) {
-         telemetry.addData("status", "waiting for start command...");
-         telemetry.update();
-     }
+        waitForStart();
 
 
 
-     telemetry.addData("Mode ", "Waiting for start");
-     telemetry.addData("imu calibrations status", imu.getCalibrationStatus().toString());
-     telemetry.update();
+        // Set the Initial; Blinkin Color Schema to Aqua (Represents CS9977 Team Colors
+        //robot2.blinkinLedDriver.setPattern(pattern);
+        //robot2.pattern = RevBlinkinLedDriver.BlinkinPattern.TWINKLES_RAINBOW_PALETTE;
+
+        /* Use this section to write the steps for Autonomous Movements
+         *
+         *  things we should include here are:
+         *      1. Motor Movements
+         *      2. Vision Detection via TensorFlow, VuForia, DodgeCV (depending on what we decide to use)
+         *      3. Sensor input/output  (Color Sensors, Distance Sensors, Limit Switches, etc..)
+         *      4. Navigation Utilities (as needed)
+         */
 
 
-     // Set the Initial; Blinkin Color Schema to Aqua (Represents CS9977 Team Colors
-     robot2.blinkinLedDriver.setPattern(pattern);
-     robot2.pattern = RevBlinkinLedDriver.BlinkinPattern.TWINKLES_RAINBOW_PALETTE;
-
-     /* Use this section to write the steps for Autonomous Movements
-     *
-     *  things we should include here are:
-     *      1. Motor Movements
-     *      2. Vision Detection via TensorFlow, VuForia, DodgeCV (depending on what we decide to use)
-     *      3. Sensor input/output  (Color Sensors, Distance Sensors, Limit Switches, etc..)
-     *      4. Navigation Utilities (as needed)
-     */
+        PIDDriveBackwards(1,0,3);
+        PIDDriveStrafeLeft(1,0,23);
+        PIDDriveForward(1,0,7);
 
 
-     PIDDriveStrafeRight(1,0,48);    // Strafe Right at full power,  0 Deg angle, 48" Distance -- TEST ONLY not for Competition
-     PIDDriveForward(1, 0, 48);      // Drive Forward at full power, 0 Deg angle, 40" Distance -- TEST ONLY not for Competition
-     PIDDrivebackward(1,0,48);       // Drive Backward  at full power, 0 Deg angle, 48" Distance -- TEST ONLY not for Competition
-
-     //  At this point of the testing, the robot should be back against the wall.   Any margin of error, means we need to tune the PID values
 
 
- } // Ends runOpMode
+
+        //PIDDriveStrafeRight(1,90,48);    // Strafe Right at full power,  0 Deg angle, 48" Distance -- TEST ONLY not for Competition
+        //PIDDriveForward(1, 90, 48);      // Drive Forward at full power, 0 Deg angle, 40" Distance -- TEST ONLY not for Competition
+        //PIDDrivebackward(1,90,48);       // Drive Backward  at full power, 0 Deg angle, 48" Distance -- TEST ONLY not for Competition
+
+        //  At this point of the testing, the robot should be back against the wall.   Any margin of error, means we need to tune the PID values
+
+
+    } // Ends runOpMode
 
     public void setupIMU() {
         // Initalize IMU
@@ -194,6 +191,7 @@ public class BlueQuarry extends LinearOpMode {
         pidDrive.setInputRange(-angle, angle);
         pidDrive.enable();
 
+
         // Use PID with imu input to drive in a straight line.
         double correction = pidDrive.performPID(getAngle2());
 
@@ -208,6 +206,28 @@ public class BlueQuarry extends LinearOpMode {
         robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+
+
+        /* Setup Default Robot Position...  setTargetPosition= null
+         *  This section was added after our initial attempts to re-use these
+         *  PID controls failed.   Error message on the DS phone indicated
+         *  we needed to setTargetPostion before running to position
+         *
+         *  I am adding this is a test, to see if we initialize the defauly
+         *  position to 0 (robot against the wall), knowing that we will re-calculate the positon
+         *  later in this method.
+         *
+         *  For competition, we will need to be more accurate, most likely.
+         */
+
+        robot2.DriveRightFront.setTargetPosition(0);
+        robot2.DriveRightRear.setTargetPosition(0);
+        robot2.DriveLeftFront.setTargetPosition(0);
+        robot2.DriveLeftRear.setTargetPosition(0);
+
+
+
+
         // Set RUN_TO_POSITION
         robot2.DriveRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         robot2.DriveLeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -216,7 +236,6 @@ public class BlueQuarry extends LinearOpMode {
         sleep(500);
 
         // Stop Motors and set Motor Power to 0
-        //PIDstopALL();
         robot2.DriveRightFront.setPower(0);
         robot2.DriveLeftFront.setPower(0);
         robot2.DriveRightRear.setPower(0);
@@ -257,7 +276,7 @@ public class BlueQuarry extends LinearOpMode {
 
     }   // END OF PIDDriveForward
 
-    public void PIDDrivebackward(double speed, double angle, int distance) {    // Added: 1/18/19
+    public void PIDDriveBackwards(double speed, double angle, int distance) {    // Added: 1/18/19
 
         // This is an attempt to use PID only, no encoders
 
@@ -276,6 +295,113 @@ public class BlueQuarry extends LinearOpMode {
         pidDrive.setSetpoint(0);
         pidDrive.setOutputRange(0, speed);
         pidDrive.setInputRange(-angle, angle);
+        pidDrive.enable();
+
+
+        // Use PID with imu input to drive in a straight line.
+        double correction = pidDrive.performPID(getAngle2());
+
+
+        //Initialize Mecanum Wheel DC Motor Behavior
+        setZeroPowerBrakes();   // Set DC Motor Brake Behavior
+
+
+        //  Reset Encoders:    Alternate way:  DriveRightFrontEncoder.reset();
+        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+
+
+        /* Setup Default Robot Position...  setTargetPosition= null
+         *  This section was added after our initial attempts to re-use these
+         *  PID controls failed.   Error message on the DS phone indicated
+         *  we needed to setTargetPostion before running to position
+         *
+         *  I am adding this is a test, to see if we initialize the defauly
+         *  position to 0 (robot against the wall), knowing that we will re-calculate the positon
+         *  later in this method.
+         *
+         *  For competition, we will need to be more accurate, most likely.
+         */
+
+        robot2.DriveRightFront.setTargetPosition(0);
+        robot2.DriveRightRear.setTargetPosition(0);
+        robot2.DriveLeftFront.setTargetPosition(0);
+        robot2.DriveLeftRear.setTargetPosition(0);
+
+
+
+
+        // Set RUN_TO_POSITION
+        robot2.DriveRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot2.DriveRightRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        sleep(500);
+
+        // Stop Motors and set Motor Power to 0
+        robot2.DriveRightFront.setPower(0);
+        robot2.DriveLeftFront.setPower(0);
+        robot2.DriveRightRear.setPower(0);
+        robot2.DriveLeftRear.setPower(0);
+
+        double InchesMoving = (distance * COUNTS_PER_INCH);
+
+
+        // Set Target
+        robot2.DriveRightFront.setTargetPosition((int) -InchesMoving);
+        robot2.DriveLeftFront.setTargetPosition((int) -InchesMoving);
+        robot2.DriveRightRear.setTargetPosition((int) -InchesMoving);
+        robot2.DriveLeftRear.setTargetPosition((int) -InchesMoving);
+
+
+        while (robot2.DriveRightFront.isBusy() && robot2.DriveRightRear.isBusy()
+                && robot2.DriveLeftFront.isBusy() && robot2.DriveLeftRear.isBusy()) {
+
+
+            //Set Motor Power  - This engages the Motors and starts the robot movements
+            robot2.DriveRightFront.setPower(speed + correction);
+            robot2.DriveLeftFront.setPower(speed + correction);
+            robot2.DriveRightRear.setPower(speed + correction);
+            robot2.DriveLeftRear.setPower(speed + correction);
+        }    // This brace closes out the while loop
+
+        //Reset Encoders
+        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        //PIDstopALL()
+        robot2.DriveRightFront.setPower(0);
+        robot2.DriveLeftFront.setPower(0);
+        robot2.DriveRightRear.setPower(0);
+        robot2.DriveLeftRear.setPower(0);
+
+    }   // END OF PIDDriveForward
+
+
+    public void PIDDriveStrafeLeft(double speed, double angle, int distance) {    // Added: 1/18/19
+
+        // This is an attempt to use PID only, no encoders
+
+
+        /* Things to pass the Method
+         *
+         * 1. speed
+         * 2. Angle
+         * 3. distance
+         *
+         * Example:  PIDDriveForward(.50,90, 24);        // Drive robot forward in a straight line for 4" @ 50% Power
+         */
+
+        // Setup Straight Line Driving
+
+        pidDrive.setSetpoint(0);
+        pidDrive.setOutputRange(0, speed);
+        pidDrive.setInputRange(-angle, 0);
         pidDrive.enable();
 
         // Use PID with imu input to drive in a straight line.
@@ -300,7 +426,7 @@ public class BlueQuarry extends LinearOpMode {
         sleep(500);
 
         // Stop Motors and set Motor Power to 0
-        //PIDstopALL()
+        //PIDstopALL();
         robot2.DriveRightFront.setPower(0);
         robot2.DriveLeftFront.setPower(0);
         robot2.DriveRightRear.setPower(0);
@@ -311,10 +437,10 @@ public class BlueQuarry extends LinearOpMode {
 
 
         // Set Target
-        robot2.DriveRightFront.setTargetPosition((int) -InchesMoving);
-        robot2.DriveLeftFront.setTargetPosition((int) -InchesMoving);
-        robot2.DriveRightRear.setTargetPosition((int) -InchesMoving);
-        robot2.DriveLeftRear.setTargetPosition((int) -InchesMoving);
+        robot2.DriveRightFront.setTargetPosition((int)- InchesMoving);
+        robot2.DriveLeftFront.setTargetPosition((int)   InchesMoving);
+        robot2.DriveRightRear.setTargetPosition((int)   InchesMoving);
+        robot2.DriveLeftRear.setTargetPosition((int)  - InchesMoving);
 
 
         while (robot2.DriveRightFront.isBusy() && robot2.DriveRightRear.isBusy()
@@ -323,9 +449,9 @@ public class BlueQuarry extends LinearOpMode {
 
             //Set Motor Power  - This engages the Motors and starts the robot movements
             robot2.DriveRightFront.setPower(speed + correction);
-            robot2.DriveLeftFront.setPower(speed + correction);
+            robot2.DriveLeftFront.setPower(speed);
             robot2.DriveRightRear.setPower(speed);
-            robot2.DriveLeftRear.setPower(speed);
+            robot2.DriveLeftRear.setPower(speed + correction);
         }    // This brace closes out the while loop
 
         //Reset Encoders
@@ -333,189 +459,19 @@ public class BlueQuarry extends LinearOpMode {
         robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        //PIDstopALL()
-        robot2.DriveRightFront.setPower(0);
-        robot2.DriveLeftFront.setPower(0);
-        robot2.DriveRightRear.setPower(0);
-        robot2.DriveLeftRear.setPower(0);
-
-    }   // END OF PIDDriveBackward
-
-    public void PIDDrivebackward2(double speed, double angle, int distance) {    // Added: 1/18/19
-
-        // This is an attempt to use PID only, no encoders
-
-
-        /* Things to pass the Method
-         *
-         * 1. speed
-         * 2. Angle
-         * 3. distance
-         *
-         * Example:  PIDDriveForward(.50,90, 24);        // Drive robot forward in a straight line for 4" @ 50% Power
-         */
-
-        // Setup Straight Line Driving
-
-        pidDrive.setSetpoint(0);
-        pidDrive.setOutputRange(0, speed);
-        pidDrive.setInputRange(-angle, angle);
-        pidDrive.enable();
-
-        // Use PID with imu input to drive in a straight line.
-        double correction = pidDrive.performPID(getAngle2());
-
-
-        //Initialize Mecanum Wheel DC Motor Behavior
-        setZeroPowerBrakes();   // Set DC Motor Brake Behavior
-
-
-        //  Reset Encoders:    Alternate way:  DriveRightFrontEncoder.reset();
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        // Set RUN_TO_POSITION
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        sleep(500);
 
         // Stop Motors and set Motor Power to 0
-        //PIDstopALL()
+        //PIDstopALL();
         robot2.DriveRightFront.setPower(0);
         robot2.DriveLeftFront.setPower(0);
         robot2.DriveRightRear.setPower(0);
         robot2.DriveLeftRear.setPower(0);
 
+    }  // END of PIDDriveStrafeRight
 
-        double InchesMoving = (distance * COUNTS_PER_INCH);
-
-
-        // Set Target
-        robot2.DriveRightFront.setTargetPosition((int) -InchesMoving);
-        robot2.DriveLeftFront.setTargetPosition((int) -InchesMoving);
-        robot2.DriveRightRear.setTargetPosition((int) -InchesMoving);
-        robot2.DriveLeftRear.setTargetPosition((int) -InchesMoving);
-
-
-        while (robot2.DriveRightFront.isBusy() && robot2.DriveRightRear.isBusy()
-                && robot2.DriveLeftFront.isBusy() && robot2.DriveLeftRear.isBusy()) {
-
-
-            //Set Motor Power  - This engages the Motors and starts the robot movements
-            robot2.DriveRightFront.setPower(speed + correction);
-            robot2.DriveLeftFront.setPower(speed + correction);
-            robot2.DriveRightRear.setPower(speed);
-            robot2.DriveLeftRear.setPower(speed);
-        }    // This brace closes out the while loop
-
-        //Reset Encoders
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        //PIDstopALL()
-        robot2.DriveRightFront.setPower(0);
-        robot2.DriveLeftFront.setPower(0);
-        robot2.DriveRightRear.setPower(0);
-        robot2.DriveLeftRear.setPower(0);
-
-    }   // END OF PIDDriveBackward
 
 
     public void PIDDriveStrafeRight(double speed, double angle, int distance) {    // Added: 1/18/19
-
-        // This is an attempt to use PID only, no encoders
-
-
-        /* Things to pass the Method
-         *
-         * 1. speed
-         * 2. Angle
-         * 3. distance
-         *
-         * Example:  PIDDriveForward(.50,90, 24);        // Drive robot forward in a straight line for 4" @ 50% Power
-         */
-
-        // Setup Straight Line Driving
-
-        pidDrive.setSetpoint(0);
-        pidDrive.setOutputRange(0, speed);
-        pidDrive.setInputRange(-angle, angle);
-        pidDrive.enable();
-
-        // Use PID with imu input to drive in a straight line.
-        double correction = pidDrive.performPID(getAngle2());
-
-
-        //Initialize Mecanum Wheel DC Motor Behavior
-        setZeroPowerBrakes();   // Set DC Motor Brake Behavior
-
-
-        //  Reset Encoders:    Alternate way:  DriveRightFrontEncoder.reset();
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        // Set RUN_TO_POSITION
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        sleep(500);
-
-        // Stop Motors and set Motor Power to 0
-        //PIDstopALL();
-        robot2.DriveRightFront.setPower(0);
-        robot2.DriveLeftFront.setPower(0);
-        robot2.DriveRightRear.setPower(0);
-        robot2.DriveLeftRear.setPower(0);
-
-
-        double InchesMoving = (distance * COUNTS_PER_INCH);
-
-
-        // Set Target
-        robot2.DriveRightFront.setTargetPosition((int) -InchesMoving);
-        robot2.DriveLeftFront.setTargetPosition((int) InchesMoving);
-        robot2.DriveRightRear.setTargetPosition((int) InchesMoving);
-        robot2.DriveLeftRear.setTargetPosition((int) -InchesMoving);
-
-
-        while (robot2.DriveRightFront.isBusy() && robot2.DriveRightRear.isBusy()
-                && robot2.DriveLeftFront.isBusy() && robot2.DriveLeftRear.isBusy()) {
-
-
-            //Set Motor Power  - This engages the Motors and starts the robot movements
-            robot2.DriveRightFront.setPower(speed);
-            robot2.DriveLeftFront.setPower(speed);
-            robot2.DriveRightRear.setPower(speed + correction);
-            robot2.DriveLeftRear.setPower(speed);
-        }    // This brace closes out the while loop
-
-        //Reset Encoders
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        // Stop Motors and set Motor Power to 0
-        //PIDstopALL();
-        robot2.DriveRightFront.setPower(0);
-        robot2.DriveLeftFront.setPower(0);
-        robot2.DriveRightRear.setPower(0);
-        robot2.DriveLeftRear.setPower(0);
-
-
-    }   // END OF PIDDriveStrafeRight
-
-    public void PIDDriveStrafeLeft(double speed, double angle, int distance) {    // Added: 1/18/19
 
         // This is an attempt to use PID only, no encoders
 
@@ -599,7 +555,7 @@ public class BlueQuarry extends LinearOpMode {
         robot2.DriveRightRear.setPower(0);
         robot2.DriveLeftRear.setPower(0);
 
-    }  // END of PIDDriveStrafeLeft
+    }  // END of PIDDriveStrafeRight
 
 
     public void RotateLeft(double speed, int distance) {
