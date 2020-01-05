@@ -5,6 +5,7 @@ import android.graphics.Color;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -54,7 +55,7 @@ import android.view.View;
 *
 */
 
-
+@Disabled    // DISABLED AS Program
 @Autonomous(name="Blue Build", group = "CS9977-test")
 
 public class BlueBuild_CAPSTONE extends LinearOpMode {
@@ -64,7 +65,7 @@ public class BlueBuild_CAPSTONE extends LinearOpMode {
 
     skyHardwareMap robot2 = new skyHardwareMap();
     ElapsedTime runtime = new ElapsedTime();
-    MecanumDrive mecanum;
+    //MecanumDrive mecanum;
 
     // Created Rev Robotics BlinkIN instances
 
