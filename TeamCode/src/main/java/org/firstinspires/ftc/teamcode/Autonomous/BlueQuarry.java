@@ -159,6 +159,9 @@ public class BlueQuarry extends LinearOpMode {
 
         // Run a test to see if first block is captstone
 
+
+        
+
         while (opModeIsActive()) {
             if (capDetect() == true && robot2.sensorDistanceR.getDistance(DistanceUnit.INCH) <= 2.0) {
                 telemetry.addLine("Skystone is Found");
