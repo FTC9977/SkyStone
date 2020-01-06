@@ -2,9 +2,11 @@ package org.firstinspires.ftc.teamcode.HardwareMap;
 
 import com.qualcomm.hardware.lynx.LynxI2cColorRangeSensor;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.I2cDevice;
@@ -51,12 +53,22 @@ import java.util.Locale;
 public class skyHardwareMap {
 
 
-    public DcMotor DriveLeftFront = null;
-    public DcMotor DriveLeftRear = null;
-    public DcMotor DriveRightFront = null;
-    public DcMotor DriveRightRear = null;
-    public DcMotor LiftLeft        = null;
-    public DcMotor LiftRight       = null;
+    public DcMotor DriveLeftFront        = null;
+    public DcMotor DriveLeftRear         = null;
+    public DcMotor DriveRightFront       = null;
+    public DcMotor DriveRightRear        = null;
+    public DcMotor LiftLeft              = null;
+    public DcMotor LiftRight             = null;
+
+    public Servo   GreenArmRight         = null;
+    public Servo   PurpleArmLeft         = null;
+
+    public ColorSensor sensorColorR, sensorColorL          = null;
+    public DistanceSensor sensorDistanceR, sensorDistanceL = null;
+
+
+
+
 
     private DcMotor motor;
 
@@ -111,12 +123,23 @@ public class skyHardwareMap {
         // Define and Initialize Motors
 
 
-        DriveLeftFront = hwMap.dcMotor.get("LF");
-        DriveLeftRear = hwMap.dcMotor.get("LR");
+        DriveLeftFront  = hwMap.dcMotor.get("LF");
+        DriveLeftRear   = hwMap.dcMotor.get("LR");
         DriveRightFront = hwMap.dcMotor.get("RF");
-        DriveRightRear = hwMap.dcMotor.get("RR");
+        DriveRightRear  = hwMap.dcMotor.get("RR");
         LiftLeft        = hwMap.dcMotor.get("LiftL");
         LiftRight       = hwMap.dcMotor.get("LiftR");
+
+        GreenArmRight   = hwMap.servo.get("GAR");
+        PurpleArmLeft   = hwMap.servo.get("PAL");
+
+        sensorColorR    = hwMap.get(ColorSensor.class, "SCDR");  // Right colorsensor
+        sensorColorL    = hwMap.get(ColorSensor.class,"SCDL");  // Left colorsensor
+
+        sensorDistanceR = hwMap.get(DistanceSensor.class, "SCDR");  // Right colorsensor for distance
+        sensorDistanceL = hwMap.get(DistanceSensor.class,"SCDL");  // Left colorsensor for distance
+
+
 
         DriveRightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         DriveRightRear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);

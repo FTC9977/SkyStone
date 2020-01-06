@@ -14,6 +14,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.DriveTrain.MecanumDrive;
 import org.firstinspires.ftc.teamcode.DriveTrain.PIDController;
@@ -21,6 +22,8 @@ import org.firstinspires.ftc.teamcode.HardwareMap.skyHardwareMap;
 
 import android.app.Activity;
 import android.view.View;
+
+import java.util.Locale;
 
 /* 10/29/19 - Good Lesson Learned here....
  *
@@ -55,16 +58,16 @@ import android.view.View;
  */
 
 
-@Autonomous(name="Blue Build", group = "CS9977-test")
+@Autonomous(name="Blue Quarry", group = "calebs_robot")
 
-public class BlueBuild_CAPSTONE extends LinearOpMode {
+public class BlueQuarry extends LinearOpMode {
 
 
     // Decalre hardware
 
     skyHardwareMap robot2 = new skyHardwareMap();
     ElapsedTime runtime = new ElapsedTime();
-    MecanumDrive mecanum;
+
 
     // Created Rev Robotics BlinkIN instances
 
@@ -73,13 +76,13 @@ public class BlueBuild_CAPSTONE extends LinearOpMode {
 
 
     // REV Robotics Color Sensor + Distance Sensor Rev v3 Definitions
-    ColorSensor sensorColor = null;
-    DistanceSensor sensorDistance = null;
     boolean capstoneDetected = false;
 
 
 
     //Create IMU Instance
+    int A;
+    int capCount = 0;
     PIDController pidDrive, pidRotate;
     BNO055IMU imu;
     Orientation lastAngles = new Orientation();
@@ -99,12 +102,10 @@ public class BlueBuild_CAPSTONE extends LinearOpMode {
         setupIMU();
 
         // Configuration setup for Capstone Detection using REV Color/Distance Sensor v3
-        sensorColor = hardwareMap.get(ColorSensor.class, "sensor_color_distance");
-        sensorDistance = hardwareMap.get(DistanceSensor.class, "sensor_color_distnace");
-
 
         // wait for the start button to be pressed.
 
+        robot2.GreenArmRight.setPosition(.99);
 
         // This chunk of code gets around the Motorola E4 Disconnect bug.  Should be fixed in SDK 5.3, but adding it as a "backup - JUST IN CASE!!!"
         //
@@ -112,6 +113,7 @@ public class BlueBuild_CAPSTONE extends LinearOpMode {
             telemetry.addData("status", "waiting for start command...");
             telemetry.update();
         }
+
 
         waitForStart();
 
@@ -152,102 +154,49 @@ public class BlueBuild_CAPSTONE extends LinearOpMode {
 
         // setup PID Drive Commands to get to first Capstone closest to bridge and align robot with color sensor on first Capstone
 
+        PIDDrivebackward(.5, 90, 26);
+       // PIDDriveStrafeRight(.5,90,10);
 
-        // Robot should now be infront of First capstone.  Invoke the Detection Method
+        // Run a test to see if first block is captstone
 
-        int capCount = 0;
-        while (opModeIsActive() && capCount != 6) {
-
-            // Capstone detection attempt #1
-            capDetect(false);    // Call Capstone Detection Method
-            if (capDetect(capstoneDetected = true)){
-                // Call Ingest method
-                // Drive to foundtation
-                // Place Block
-                // Move Foundation
-                // Drive to centerline and stop
-                telemetry.addLine("Capstone Found");
+        while (opModeIsActive()) {
+            if (capDetect() == true && robot2.sensorDistanceR.getDistance(DistanceUnit.INCH) <= 2.0) {
+                telemetry.addLine("Skystone is Found");
+                telemetry.addData("Distance (inches) is: ", String.format(Locale.US, "%.02f", robot2.sensorDistanceR.getDistance(DistanceUnit.INCH)));
+                telemetry.addData("Red ", robot2.sensorColorR.red());
+                telemetry.addData("Green ", robot2.sensorColorR.green());
+                telemetry.addData("Blue ", robot2.sensorColorR.blue());
                 telemetry.update();
-                capCount = 6;
-            } else
-                capCount = capCount + 1;  // Increase Capcount by 1
-            PIDDriveStrafeRight(.50, 90,12);   // straff right and try again
+                //PIDDriveStrafeRight(1,90,1);
+                PIDDrivebackward(1,90,3);
+                robot2.GreenArmRight.setPosition(0);   // Lower Servo arm to grab Skystone
+                sleep(1000);
+                break;
 
-            // Capstone dection attempt #2
-            capDetect(false); //Call Capstone Detection Method
-            if (capDetect(capstoneDetected = true)){
-                // Call Ingest method
-                // Drive to foundtation
-                // Place Block
-                // Move Foundation
-                // Drive to centerline and stop
-                telemetry.addLine("Capstone Found");
-                telemetry.update();
-            } else
-                capCount = capCount + 1;  // Increase Capcount by 1
-            PIDDriveStrafeRight(.50, 90,12);   // straff right and try again
+            } else if (capCount >= 6  ){
+                break;
+            }
 
-            // Capstone dection attempt #3
-            capDetect(false); //Call Capstone Detection Method
-            if (capDetect(capstoneDetected = true)){
-                // Call Ingest method
-                // Drive to foundtation
-                // Place Block
-                // Move Foundation
-                // Drive to centerline and stop
-                telemetry.addLine("Capstone Found");
-                telemetry.update();
-            } else
-                capCount = capCount + 1;  // Increase Capcount by 1
-            PIDDriveStrafeRight(.50, 90,12);   // straff right and try again
+                else {
+                telemetry.addLine("Skystone not found");
 
-            // Capstone dection attempt #4
-            capDetect(false); //Call Capstone Detection Method
-            if (capDetect(capstoneDetected = true)){
-                // Call Ingest method
-                // Drive to foundtation
-                // Place Block
-                // Move Foundation
-                // Drive to centerline and stop
-                telemetry.addLine("Capstone Found");
-                telemetry.update();
-            } else
-                capCount = capCount + 1;  // Increase Capcount by 1
-            PIDDriveStrafeRight(.50, 90,12);   // straff right and try again
 
-            // Capstone dection attempt #5
-            capDetect(false); //Call Capstone Detection Method
-            if (capDetect(capstoneDetected = true)){
-                // Call Ingest method
-                // Drive to foundtation
-                // Place Block
-                // Move Foundation
-                // Drive to centerline and stop
-                telemetry.addLine("Capstone Found");
-                telemetry.update();
-            } else
-                capCount = capCount + 1;  // Increase Capcount by 1
-            PIDDriveStrafeRight(.50, 90,12);   // straff right and try again
+                     capCount = capCount + 1;
 
-            // Capstone dection attempt #6
-            capDetect(false); //Call Capstone Detection Method
-            if (capDetect(capstoneDetected = true)){
-                // Call Ingest method
-                // Drive to foundtation
-                // Place Block
-                // Move Foundation
-                // Drive to centerline and stop
-                telemetry.addLine("Capstone Found");
-                telemetry.update();
-            } else
-                capCount = capCount + 1;  // Increase Capcount by 1
-            PIDDriveStrafeLeft(1, 90, 96);  // Could not detect Capston.  Something went wrong.  Gracefully move to the center line and park
+            // Robot should now be infront of First capstone.  Invoke the Detection Method
+
+                PIDDriveStrafeRight(.5,90,10);
+
+              sleep(100);
+            }
 
         }
 
+        PIDDriveForward(.5,90,5);
+
+
 
     }
-
 
     // This section is a placeholder for Vision Detection of the Skystone
     //  Methods we can choose from include:
@@ -406,10 +355,10 @@ public class BlueBuild_CAPSTONE extends LinearOpMode {
          *  For competition, we will need to be more accurate, most likely.
          */
 
-        //robot2.DriveRightFront.setTargetPosition(0);
-        //robot2.DriveRightRear.setTargetPosition(0);
-        //robot2.DriveLeftFront.setTargetPosition(0);
-        //robot2.DriveLeftRear.setTargetPosition(0);
+        robot2.DriveRightFront.setTargetPosition(0);
+        robot2.DriveRightRear.setTargetPosition(0);
+        robot2.DriveLeftFront.setTargetPosition(0);
+        robot2.DriveLeftRear.setTargetPosition(0);
 
         telemetry.addLine("Just setTarget Position");
         telemetry.update();
@@ -502,6 +451,13 @@ public class BlueBuild_CAPSTONE extends LinearOpMode {
         robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+
+        robot2.DriveRightFront.setTargetPosition(0);
+        robot2.DriveRightRear.setTargetPosition(0);
+        robot2.DriveLeftFront.setTargetPosition(0);
+        robot2.DriveLeftRear.setTargetPosition(0);
+
+
         // Set RUN_TO_POSITION
         robot2.DriveRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         robot2.DriveLeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -586,6 +542,13 @@ public class BlueBuild_CAPSTONE extends LinearOpMode {
         robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+
+        robot2.DriveRightFront.setTargetPosition(0);
+        robot2.DriveRightRear.setTargetPosition(0);
+        robot2.DriveLeftFront.setTargetPosition(0);
+        robot2.DriveLeftRear.setTargetPosition(0);
+
 
         // Set RUN_TO_POSITION
         robot2.DriveRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -672,6 +635,13 @@ public class BlueBuild_CAPSTONE extends LinearOpMode {
         robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+
+        robot2.DriveRightFront.setTargetPosition(0);
+        robot2.DriveRightRear.setTargetPosition(0);
+        robot2.DriveLeftFront.setTargetPosition(0);
+        robot2.DriveLeftRear.setTargetPosition(0);
+
 
         // Set RUN_TO_POSITION
         robot2.DriveRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -760,6 +730,13 @@ public class BlueBuild_CAPSTONE extends LinearOpMode {
         robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+
+        robot2.DriveRightFront.setTargetPosition(0);
+        robot2.DriveRightRear.setTargetPosition(0);
+        robot2.DriveLeftFront.setTargetPosition(0);
+        robot2.DriveLeftRear.setTargetPosition(0);
+
+
         // Set RUN_TO_POSITION
         robot2.DriveRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         robot2.DriveLeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -820,6 +797,13 @@ public class BlueBuild_CAPSTONE extends LinearOpMode {
         robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         sleep(500);
 
+
+        robot2.DriveRightFront.setTargetPosition(0);
+        robot2.DriveRightRear.setTargetPosition(0);
+        robot2.DriveLeftFront.setTargetPosition(0);
+        robot2.DriveLeftRear.setTargetPosition(0);
+
+
         // Set RUN_TO_POSITION
 
         robot2.DriveRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -876,6 +860,13 @@ public class BlueBuild_CAPSTONE extends LinearOpMode {
         robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         sleep(500);
+
+
+        robot2.DriveRightFront.setTargetPosition(0);
+        robot2.DriveRightRear.setTargetPosition(0);
+        robot2.DriveLeftFront.setTargetPosition(0);
+        robot2.DriveLeftRear.setTargetPosition(0);
+
 
         // Set RUN_TO_POSITION
 
@@ -965,9 +956,9 @@ public class BlueBuild_CAPSTONE extends LinearOpMode {
         // convert the RGB values to HSV values.
         // multiply by the SCALE_FACTOR.
         // then cast it back to int (SCALE_FACTOR is a double)
-        Color.RGBToHSV((int) (sensorColor.red() * SCALE_FACTOR),
-                (int) (sensorColor.green() * SCALE_FACTOR),
-                (int) (sensorColor.blue() * SCALE_FACTOR),
+        Color.RGBToHSV((int) (robot2.sensorColorR.red() * SCALE_FACTOR),
+                (int) (robot2.sensorColorR.green() * SCALE_FACTOR),
+                (int) (robot2.sensorColorR.blue() * SCALE_FACTOR),
                 hsvValues);
 
 
@@ -979,7 +970,7 @@ public class BlueBuild_CAPSTONE extends LinearOpMode {
           otherwise we are seeing soemthing other than black, and not seeing the capston
           Courtesy of FTC 5898 Youtube Explaination.  (https://www.youtube.com/watch?v=i0AskHFkZ94)
      */
-        ColorCondition = (sensorColor.red() / sensorColor.blue() * (sensorColor.green() / sensorColor.blue()));
+        ColorCondition = (robot2.sensorColorR.red() / robot2.sensorColorR.blue() * (robot2.sensorColorR.green() / robot2.sensorColorR.blue()));
 
         if(ColorCondition <= RevCondition) {
             telemetry.addLine("capstone detected");
@@ -991,6 +982,44 @@ public class BlueBuild_CAPSTONE extends LinearOpMode {
         return isFound;
     }
 
+    public boolean capDetect () {
+        //boolean isFound;
+        // hsvValues is an array that will hold the hue, saturation, and value information.
+        float hsvValues[] = {0F, 0F, 0F};
+        // values is a reference to the hsvValues array.
+        final float values[] = hsvValues;
+        // sometimes it helps to multiply the raw RGB values with a scale factor
+        // to amplify/attentuate the measured values.
+        final double SCALE_FACTOR = 255;
+        // get a reference to the RelativeLayout so we can change the background
+        // color of the Robot Controller app to match the hue detected by the RGB sensor.
+        int relativeLayoutId = hardwareMap.appContext.getResources().getIdentifier("RelativeLayout", "id", hardwareMap.appContext.getPackageName());
+        final View relativeLayout = ((Activity) hardwareMap.appContext).findViewById(relativeLayoutId);
+        int RevCondition = 3;      // 3 = Using Rev Color Sensor V3;  2 = Using Rev Color Sensor V2(older)
+        int ColorCondition = 0;    // Initialize ColorCondition variable to zero
+        //  END OF Capston Configuration setup parameters
+        // convert the RGB values to HSV values.
+        // multiply by the SCALE_FACTOR.
+        // then cast it back to int (SCALE_FACTOR is a double)
+        Color.RGBToHSV((int) (robot2.sensorColorR.red() * SCALE_FACTOR),
+                (int) (robot2.sensorColorR.green() * SCALE_FACTOR),
+                (int) (robot2.sensorColorR.blue() * SCALE_FACTOR),
+                hsvValues);
+        //  This is the algorithm to Normailze the Blue channel.
+    /*
+      Concept:
+         Normailize the Blue channel.    Multiple the Red * Gree deviced by Blue^2
+         If the Color Condition <= RevCondition # (3); then we are seeing the capstone (black)
+          otherwise we are seeing soemthing other than black, and not seeing the capston
+          Courtesy of FTC 5898 Youtube Explaination.  (https://www.youtube.com/watch?v=i0AskHFkZ94)
+     */
+        ColorCondition = (robot2.sensorColorR.red() / robot2.sensorColorR.blue() * (robot2.sensorColorR.green() / robot2.sensorColorR.blue()));
+        if(ColorCondition <= RevCondition) {
+            telemetry.addData("Color Condition equals: ", ColorCondition);
+            return true;
+        } else
+        return false;
+    }
 
 
 }
