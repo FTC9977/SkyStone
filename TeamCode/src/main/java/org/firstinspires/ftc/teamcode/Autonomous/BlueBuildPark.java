@@ -3,11 +3,8 @@ package org.firstinspires.ftc.teamcode.Autonomous;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -20,7 +17,7 @@ import org.firstinspires.ftc.teamcode.HardwareMap.skyHardwareMap;
 
 //
 
-@Disabled    // DISABLED AS Program
+
 @Autonomous(name="Blue Build Park", group = "calebs_robot")
 
 public class BlueBuildPark extends LinearOpMode {
@@ -30,8 +27,6 @@ public class BlueBuildPark extends LinearOpMode {
 
     skyHardwareMap robot2 = new skyHardwareMap();
     ElapsedTime runtime = new ElapsedTime();
-
-
 
     // Created Rev Robotics BlinkIN instances
 

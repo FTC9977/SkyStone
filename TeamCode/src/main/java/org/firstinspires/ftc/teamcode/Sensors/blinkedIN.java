@@ -56,11 +56,6 @@ public class blinkedIN extends LinearOpMode {
 
      RevBlinkinLedDriver blinkinLedDriver;
      RevBlinkinLedDriver.BlinkinPattern pattern;
-     RevBlinkinLedDriver.BlinkinPattern RedPattern;         // Use this Patter to Signal 15 seconds or less exist in Game
-     RevBlinkinLedDriver.BlinkinPattern YellowPatter;       // Use this Pattern to Signal Start of End Game (30seconds)
-     RevBlinkinLedDriver.BlinkinPattern GreenPattern;       // Use this Pattern to Signal TeleOP Timer is within Delta
-     RevBlinkinLedDriver.BlinkinPattern GoldPattern;        // Use this pattern to signal we are only seeing plain stone
-     RevBlinkinLedDriver.BlinkinPattern FoundStonePattern;  // Use this to signal we found Stone in AS
 
 
  @Override
@@ -68,7 +63,6 @@ public class blinkedIN extends LinearOpMode {
 
         blinkinLedDriver = hardwareMap.get(RevBlinkinLedDriver.class, "lights");
         pattern = RevBlinkinLedDriver.BlinkinPattern.AQUA;
-
 
 
 

@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.Autonomous;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -18,7 +17,7 @@ import org.firstinspires.ftc.teamcode.HardwareMap.skyHardwareMap;
 
 //
 
-@Disabled    // DISABLED AS Program
+
 @Autonomous(name="Red Quarry", group = "CS9977-test")
 
 public class RedQuarry extends LinearOpMode {
@@ -44,8 +43,8 @@ public class RedQuarry extends LinearOpMode {
 
     //Define Drivetrain Variabeles
 
-    static final double COUNTS_PER_MOTOR_REV = 753.2;   // Andymark 40 Motor Tick Count
-    static final double DRIVE_GEAR_REDUCTION = 1;    // This is > 1.0 if motors are geared up ____  Using OVerdrive gearing with Pico Uno boxes  40 gear to 35 gear over-drive
+    static final double COUNTS_PER_MOTOR_REV = 1120;   // Andymark 40 Motor Tick Count
+    static final double DRIVE_GEAR_REDUCTION = 1.5;    // This is > 1.0 if motors are geared up ____  Using OVerdrive gearing with Pico Uno boxes  40 gear to 35 gear over-drive
     static final double WHEEL_DIAMETER_INCHES = 4.0;   // For figuring out circumfrance
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
 
