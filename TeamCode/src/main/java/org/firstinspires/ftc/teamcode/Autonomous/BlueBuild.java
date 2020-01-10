@@ -123,7 +123,8 @@ public class BlueBuild extends LinearOpMode {
 
 
      //PIDDriveForward(.5,90,12);  // Drive Foward @ 50% power, 90 degrees, 12"
-     //PIDDriveForward(.75,90,24); // Drive Forward @ 75% power, 90 degrees, 24"
+     PIDDriveForward(.5,90,24); // Drive Forward @ 75% power, 90 degrees, 24"
+    // RotateRight(.5,2);
      //PIDDriveForward(1,90,24); // Drive Forward at 100% power, 90 degress, 24"
 
      //PIDDrivebackward(.5,90,12); //Drive Backward @ 50% power, 90 degrees, 12"
@@ -134,7 +135,7 @@ public class BlueBuild extends LinearOpMode {
      //PIDDriveStrafeRight(.75, 90, 24); //strafe right @ 75% power, 90 degrees, 24"
      //PIDDriveStrafeRight(1, 90, 24); //strafe right @ 100% power, 90 degrees, 24"
 
-     PIDDriveStrafeLeft(.50, 90, 12); //strafe left @ 50% power, 90 degrees, 12"
+     //PIDDriveStrafeLeft(.50, 90, 12); //strafe left @ 50% power, 90 degrees, 12"
      //PIDDriveStrafeLeft(.75, 90, 24); //strafe left @ 75% power, 90 degrees, 24"
      //PIDDriveStrafeLeft(1,90, 24); //strafe left @ 100% power, 90 degrees, 24"
 
@@ -316,9 +317,9 @@ public class BlueBuild extends LinearOpMode {
 
             //Set Motor Power  - This engages the Motors and starts the robot movements
             robot2.DriveRightFront.setPower(speed + correction);
-            robot2.DriveLeftFront.setPower(speed + correction);
+            robot2.DriveLeftFront.setPower(speed + correction );
             robot2.DriveRightRear.setPower(speed + correction);
-            robot2.DriveLeftRear.setPower(speed + correction);
+            robot2.DriveLeftRear.setPower(speed + correction );
         }    // This brace closes out the while loop
 
         //Reset Encoders

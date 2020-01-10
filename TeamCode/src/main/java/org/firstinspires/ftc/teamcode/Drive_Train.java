@@ -1,11 +1,16 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
+import com.qualcomm.hardware.rev.RevTouchSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+//import com.qualcomm.robotcore.hardware.I2cDevice;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.util.Arrays;
 
@@ -39,7 +44,15 @@ public class Drive_Train extends LinearOpMode {
     private static DcMotor LiftRight;
     private static DcMotor InRight;
     private static DcMotor InLeft;
-    private static Servo   ArmServo;
+    private static Servo   ArmServo1,LHook,RHook,PurpleArmLeft,GreenArmRight,ArmServo2,claw;
+    int A;
+    int B;
+    int C;
+    private static RevBlinkinLedDriver blinkinLedDriver;
+    private static RevBlinkinLedDriver.BlinkinPattern pattern;
+    private static TouchSensor Touch;
+
+    ElapsedTime runtime = new ElapsedTime();
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -55,8 +68,18 @@ public class Drive_Train extends LinearOpMode {
         InLeft = hardwareMap.dcMotor.get(UniversalConstants.InLeft);
         InRight = hardwareMap.dcMotor.get(UniversalConstants.InRight);
 
-        ArmServo = hardwareMap.servo.get(UniversalConstants.ArmServo);
+        ArmServo1 = hardwareMap.servo.get(UniversalConstants.ArmServo1);
+        ArmServo2 = hardwareMap.servo.get(UniversalConstants.ArmServo2);
+        LHook = hardwareMap.servo.get(UniversalConstants.LHook);
+        RHook = hardwareMap.servo.get(UniversalConstants.RHook);
+        PurpleArmLeft = hardwareMap.servo.get(UniversalConstants.PurpleArmLeft);
+        GreenArmRight = hardwareMap.servo.get(UniversalConstants.GreenArmRight);
+        claw = hardwareMap.servo.get(UniversalConstants.claw);
 
+        blinkinLedDriver = hardwareMap.get(RevBlinkinLedDriver.class, "lights");
+        pattern = RevBlinkinLedDriver.BlinkinPattern.AQUA;
+
+        Touch = hardwareMap.touchSensor.get( "touch");
 
 
         LiftLeft.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -67,43 +90,104 @@ public class Drive_Train extends LinearOpMode {
 
 
         InLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.BEATS_PER_MINUTE_LAVA_PALETTE);
 
         waitForStart();
-
+         A = 0;
+         B = 0;
+         C = 0;
+         runtime.reset();
         while (opModeIsActive()) {
 
+            if (gamepad1.x && (A <= 0)){
+               claw.setPosition(.1); // close
+                A = A +1;
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
+            }else if (gamepad1.x && (A >= 1)){
+                claw.setPosition(.9); // open
+                A = A -1;
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
+            }
 
-            while (gamepad1.a) {
+
+            if (gamepad1.left_bumper){
+                PurpleArmLeft.setPosition(.99);
+                //GreenArmRight.setPosition(.1);
+            }else {
+                PurpleArmLeft.setPosition(.1);
+                //GreenArmRight.setPosition(.99);
+            }
+
+            if (gamepad1.right_bumper){
+                LHook.setPosition(.1);
+                RHook.setPosition(.8);
+            } else {
+                LHook.setPosition(.5);
+                RHook.setPosition(.4);
+            }
+
+            if (gamepad1.a) {
                  LiftLeft.setPower(.75);
                  LiftRight.setPower(.75);
-
-                 if(!gamepad1.a) {
-                     LiftLeft.setPower(.02);
-                     LiftRight.setPower(.02);
-                     sleep(3000);
-                     LiftRight.setPower(0);
-                     LiftLeft.setPower(0);
-                 }
+            } else if (gamepad1.b){
+                LiftLeft.setPower(-.5);
+                LiftRight.setPower(-.5);
+            } else {
+                LiftLeft.setPower(.1);
+                LiftRight.setPower(.1);
             }
 
 
             if (gamepad1.dpad_down){
-                InLeft.setPower(.8);
-                InRight.setPower(.75);
+                InLeft.setPower(.5);
+                InRight.setPower(.5);
+                B = B + 1;
             }else if (gamepad1.dpad_up){
-                InLeft.setPower(-.8);
-                InRight.setPower(-.75);
+                InLeft.setPower(-.5);
+                InRight.setPower(-.5);
+                B = B + 1;
             }else if (gamepad1.dpad_left){
                 InLeft.setPower(0);
                 InRight.setPower(0);
+                B = 0 ;
             }
 
-
-            if (gamepad1.right_bumper == true){
-                ArmServo.setPosition(.1);
-            }else if (gamepad1.right_bumper == false){
-                ArmServo.setPosition(.7);
+            if (gamepad1.dpad_up || gamepad1.dpad_down ){
+                ArmServo1.setPosition(.7);   // Raise it to accept block
+                ArmServo2.setPosition(.3);
             }
+
+            if (gamepad1.right_trigger >= .5){
+                ArmServo1.setPosition(.1);
+                ArmServo2.setPosition(.9);
+            }
+            if (gamepad1.left_trigger >= .5 || (C == 1)){
+                ArmServo1.setPosition(.1);
+                ArmServo2.setPosition(.9);
+            }
+             if ((gamepad1.right_trigger <= .5) && ( B == 0 ) ) {
+                 ArmServo1.setPosition(.9);
+                 ArmServo2.setPosition(.1);
+             }
+
+             if (Touch.isPressed()){
+                 blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
+             } else if ((Touch.isPressed()== false) && A <= 0){
+                 blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
+             }
+
+            if ((runtime.seconds() >= 90) &&  runtime.seconds() <= 99) {
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.COLOR_WAVES_OCEAN_PALETTE);
+            }
+            if ((runtime.seconds() >= 100) && runtime.seconds() <= 109) {
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW);
+            }
+            if ((runtime.seconds() >= 110) && runtime.seconds() <= 120) {
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.LIGHT_CHASE_RED);
+            }
+
+            telemetry.addData("Time ", runtime.seconds());
+            telemetry.update();
 
 
            /*

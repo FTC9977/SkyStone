@@ -30,6 +30,8 @@ public class LED_TEST extends LinearOpMode {
 
     // Created Rev Robotics BlinkIN instances
 
+
+
     RevBlinkinLedDriver blinkinLedDriver;
     RevBlinkinLedDriver.BlinkinPattern pattern;
     ElapsedTime runtime = new ElapsedTime();
@@ -46,6 +48,8 @@ public class LED_TEST extends LinearOpMode {
 
         // Set the Initial; Blinkin Color Schema to Aqua (Represents CS9977 Team Colors
 
+        blinkinLedDriver = hardwareMap.get(RevBlinkinLedDriver.class, "lights");
+
         pattern = RevBlinkinLedDriver.BlinkinPattern.AQUA;
         blinkinLedDriver.setPattern(pattern);
 
@@ -57,23 +61,37 @@ public class LED_TEST extends LinearOpMode {
 
 
             // Adding section for REV Blinkin Controls for Game Timers ONLY......This does NOT inclide LED colors for closing of claw
+     /*
+            if ((runtime.seconds() >= 90)) {
+                //pattern = RevBlinkinLedDriver.BlinkinPattern.COLOR_WAVES_LAVA_PALETTE;
+                //blinkinLedDriver.setPattern(pattern);
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.COLOR_WAVES_LAVA_PALETTE);
 
-            if ((runtime.seconds() == 150)) {
-                pattern = RevBlinkinLedDriver.BlinkinPattern.COLOR_WAVES_LAVA_PALETTE;
-                blinkinLedDriver.setPattern(pattern);
-                sleep(3000);
-            } else if ((runtime.seconds() == 160)) {
-                pattern = RevBlinkinLedDriver.BlinkinPattern.STROBE_GOLD;
-                blinkinLedDriver.setPattern(pattern);
-                sleep(3000);
-            } else if ((runtime.seconds() == 170)) {
-                pattern = RevBlinkinLedDriver.BlinkinPattern.RED;
-                blinkinLedDriver.setPattern(pattern);
-            } else
-                pattern = RevBlinkinLedDriver.BlinkinPattern.AQUA;
-                blinkinLedDriver.setPattern(pattern);
+            } else if ((runtime.seconds() >= 100)) {
+               // pattern = RevBlinkinLedDriver.BlinkinPattern.STROBE_GOLD;
+               // blinkinLedDriver.setPattern(pattern);
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.STROBE_GOLD);
+
+            } else if ((runtime.seconds() >= 110)) {
+                //pattern = RevBlinkinLedDriver.BlinkinPattern.RED;
+                //blinkinLedDriver.setPattern(pattern);
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
+            }
+       */
+
+            if ((runtime.seconds() >= 90) &&  runtime.seconds() <= 99) {
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.COLOR_WAVES_LAVA_PALETTE);
+            }
+            if ((runtime.seconds() >= 100) && runtime.seconds() <= 109) {
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.GOLD);
+            }
+            if ((runtime.seconds() >= 110) && runtime.seconds() <= 120) {
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
+            }
 
 
+            telemetry.addData("Time ", runtime.seconds());
+            telemetry.update();
 
         }
     }
