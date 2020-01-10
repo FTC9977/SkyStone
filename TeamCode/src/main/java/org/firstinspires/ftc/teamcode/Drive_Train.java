@@ -47,6 +47,7 @@ public class Drive_Train extends LinearOpMode {
     private static Servo   ArmServo1,LHook,RHook,PurpleArmLeft,GreenArmRight,ArmServo2,claw;
     int A;
     int B;
+    int C;
     private static RevBlinkinLedDriver blinkinLedDriver;
     private static RevBlinkinLedDriver.BlinkinPattern pattern;
     private static TouchSensor Touch;
@@ -94,6 +95,7 @@ public class Drive_Train extends LinearOpMode {
         waitForStart();
          A = 0;
          B = 0;
+         C = 0;
          runtime.reset();
         while (opModeIsActive()) {
 
@@ -159,9 +161,9 @@ public class Drive_Train extends LinearOpMode {
                 ArmServo1.setPosition(.1);
                 ArmServo2.setPosition(.9);
             }
-            if (gamepad1.left_trigger >= .5){
-             //   ArmServo1.setPosition(.9);
-               // ArmServo2.setPosition(.1);
+            if (gamepad1.left_trigger >= .5 || (C == 1)){
+                ArmServo1.setPosition(.1);
+                ArmServo2.setPosition(.9);
             }
              if ((gamepad1.right_trigger <= .5) && ( B == 0 ) ) {
                  ArmServo1.setPosition(.9);
