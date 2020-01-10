@@ -11,7 +11,13 @@ public class UniversalConstants {
     static final String LiftRight = "LiftR"; // Right Lift Motor
     static final String InRight = "InRight";// ingest Right
     static final String InLeft = "InLeft";// ingest Left
-    static final String ArmServo = "ArmServo";
+    static final String ArmServo1 = "ArmServo1";
+    static final String ArmServo2 = "ArmServo2";
+    static final String LHook = "LHook";
+    static final String RHook = "RHook";
+    static final String GreenArmRight = "GAR";
+    static final String PurpleArmLeft = "PAL";
+    static final String claw = "claw";
 
 
     final static int NV20_COUNTS_PER_MOTOR_REV = 537;        // NeveRest 20 Motor Tick Count

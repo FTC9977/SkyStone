@@ -160,7 +160,7 @@ public class BlueQuarry extends LinearOpMode {
         // Run a test to see if first block is captstone
 
 
-        
+
 
         while (opModeIsActive()) {
             if (capDetect() == true && robot2.sensorDistanceR.getDistance(DistanceUnit.INCH) <= 2.0) {
@@ -188,9 +188,15 @@ public class BlueQuarry extends LinearOpMode {
 
             // Robot should now be infront of First capstone.  Invoke the Detection Method
 
+                if (capCount == 1) {
+                    RotateLeft(1,2);
+                }if (capCount == 4){
+                    RotateRight(1,2);
+                }
+
                 PIDDriveStrafeRight(.5,90,10);
 
-              sleep(100);
+              sleep(500);
             }
 
         }
@@ -676,10 +682,10 @@ public class BlueQuarry extends LinearOpMode {
 
 
             //Set Motor Power  - This engages the Motors and starts the robot movements
-            robot2.DriveRightFront.setPower(speed);
-            robot2.DriveLeftFront.setPower(speed);
+            robot2.DriveRightFront.setPower(speed + correction);
+            robot2.DriveLeftFront.setPower(speed + correction);
             robot2.DriveRightRear.setPower(speed + correction);
-            robot2.DriveLeftRear.setPower(speed);
+            robot2.DriveLeftRear.setPower(speed + correction);
         }    // This brace closes out the while loop
 
         //Reset Encoders
