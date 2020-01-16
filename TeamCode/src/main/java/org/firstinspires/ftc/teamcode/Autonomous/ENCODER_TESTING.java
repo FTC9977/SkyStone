@@ -71,8 +71,41 @@ public class ENCODER_TESTING extends LinearOpMode {
 
     //Define Drivetrain Variabeles
 
+
+    /*   Caluclating Gear Reduction Variable
+
+       Example 1:  Overdrive Example  (Geared up)
+         Driver Gear = 45 tooth
+         Driven Gear = 35 tooth
+
+         35/45 = .77  or 1:0.77 Over Drive     (DRIVE_GEAR_REDUCTION = .77)
+
+
+
+       Example 2: Reduction (Geared down)
+         Driver Gear = 35 tooth
+         Driven Gear = 45 tooth
+
+         45/35 =  1.28 or 1:1.28 Reduction      (DRIVE_GEAR_REDUCTION = 1.28)
+
+
+
+       Example 3: Overdrive Example  (Geared up)
+          Driver Sprocket = 32 tooth
+          Driven Sprocket = 16 toot
+
+          16/32 = .5   or   1: 0.5 Over Drive   (DRIVE_GEAR_REDUCTION = .50)
+
+
+          Thus, if
+             Motors are 1:1, set DRIVE_GEAR_REDUCTION = 1
+             Motors are gearned down (reduction) , set DRIVE_GEAR_REDUCTION = value calculated      generally > 1.0 in value)
+             Motors are gear UP (Overdrive), set DRIVE_GEAR_REDUCTION = value calculated            (generally < 1.0 in value)
+
+     */
+
     static final double COUNTS_PER_MOTOR_REV = 753.2;   // Andymark 40 Motor Tick Count
-    static final double DRIVE_GEAR_REDUCTION = .5;    // This is > 1.0 if motors are geared up ____  Using OVerdrive gearing with Pico Uno boxes  40 gear to 35 gear over-drive
+    static final double DRIVE_GEAR_REDUCTION = .50;    // This is < 1.0 if motors are geared up (Overdrive) or > 1.0 if motors are geared down (Reduction)
     static final double WHEEL_DIAMETER_INCHES = 4.0;   // For figuring out circumfrance
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
 
