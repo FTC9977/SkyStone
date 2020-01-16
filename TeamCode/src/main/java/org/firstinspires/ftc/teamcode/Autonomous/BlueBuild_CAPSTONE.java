@@ -55,7 +55,7 @@ import android.view.View;
  */
 
 
-@Autonomous(name="Blue Build", group = "CS9977-test")
+@Autonomous(name="Blue Build_CAPSTONE", group = "CS9977-test")
 
 public class BlueBuild_CAPSTONE extends LinearOpMode {
 

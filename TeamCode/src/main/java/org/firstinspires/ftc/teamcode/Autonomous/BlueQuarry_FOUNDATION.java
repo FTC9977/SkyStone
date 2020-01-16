@@ -58,7 +58,7 @@ import java.util.Locale;
  */
 
 
-@Autonomous(name="Blue Quarry", group = "calebs_robot")
+@Autonomous(name="Blue Quarry_FOUNDATION", group = "calebs_robot")
 
 public class BlueQuarry_FOUNDATION extends LinearOpMode {
 
