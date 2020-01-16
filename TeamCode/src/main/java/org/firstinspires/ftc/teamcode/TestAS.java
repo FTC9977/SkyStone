@@ -5,6 +5,7 @@ import android.graphics.drawable.GradientDrawable;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -18,7 +19,7 @@ import org.firstinspires.ftc.teamcode.DriveTrain.*;
 
 @Autonomous(name="TestAS1", group = AutonomousData.OFFICIAL_GORUP)
 
-
+@Disabled
 public class TestAS extends LinearOpMode {
 
     // Declare Hardware

@@ -50,7 +50,7 @@ This is a simple program that will use the REV Robotics BlinkedIN Controller
  */
 @TeleOp(name = "LED Test", group = "CS9977")
 
-//@Disabled
+@Disabled
 
 public class blinkedIN extends LinearOpMode {
 

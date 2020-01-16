@@ -50,7 +50,7 @@ import org.firstinspires.ftc.teamcode.HardwareMap.skyHardwareMap;
 
 //@Disabled    // DISABLED AS Program
 @Autonomous(name="CSimu", group = "imu-test")     // change group name back to CS9977-test when done
-
+@Disabled
 public class CSimu extends LinearOpMode {
 
 

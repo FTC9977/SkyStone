@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -13,7 +14,7 @@ import java.util.Arrays;
 
 
 @TeleOp(name="LED Test_TELOP", group="calebs_robot")
-//@Disabled
+@Disabled
 public class LED_TEST extends LinearOpMode {
 
 

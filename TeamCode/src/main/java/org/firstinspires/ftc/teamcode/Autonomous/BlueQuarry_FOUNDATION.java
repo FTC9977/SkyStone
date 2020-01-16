@@ -7,6 +7,7 @@ import android.view.View;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -58,8 +59,8 @@ import java.util.Locale;
  */
 
 
-@Autonomous(name="Blue Quarry", group = "calebs_robot")
-
+@Autonomous(name="Blue Quarry_FOUNDATION", group = "calebs_robot")
+//@Disabled
 public class BlueQuarry_FOUNDATION extends LinearOpMode {
 
 
@@ -168,94 +169,22 @@ public class BlueQuarry_FOUNDATION extends LinearOpMode {
 
         // setup PID Drive Commands to get to Foundation
 
-        while ((opModeIsActive() && (Touch.isPressed() != false))) {
-            PIDDrivebackward(.5, 90, 48);
-        }  // We should now be infront of foundation
-
-        if (Touch.isPressed()){         // We should be at the foundation, and touch sensor is pressed
-            LHook.setPosition(.1);      // Lower the Left Hook, and clamp on foundation
-            RHook.setPosition(.8);      // Lower the Right Hook and clam on foundation
+        PIDDriveStrafeLeft(.5,90,13);
+        PIDDrivebackward(.5,90,40);
+        /*robot2.LHook.setPosition(.1);
+        robot2.RHook.setPosition(.8);
+        sleep(500);
+        PIDDriveForward(.7,90,40);
+        //RotateRight(.7,25);
+        //PIDDrivebackward2(.5,90,5);
+        robot2.LHook.setPosition(.5);
+        robot2.RHook.setPosition(.4);
+        PIDDriveStrafeRight(1,90,45);
+        PIDDrivebackward2(.7,90,17);
+        PIDDriveStrafeRight(1,90,15);
+        PIDDrivebackward2(.7,90,10);
+   */
         }
-        stop();   // For testing only.  This will ensure we are latched onto foundation before moving to help avoid breakage of servos
-
-
-
-        /*   Foundation Move: Test Case 2
-         *
-         *  Assumption:  We have already driven to the foundations and latched onto it.
-         *
-         *  1) Move foundation to the Right 3".  This is so we can clear the wall before rotating it
-         *  2) Rotate the entire foundations 24" (hopefully yields a 90 Degree turn)
-         *  3) Drive it backwards to the field wall
-         *  4) Strafe to the right 4", so that foundation breaks the tape plane
-         *  4) Drive to Parking Zone
-         *
-         */
-    // Postion Foundation
-       PIDDriveStrafeRight(.5, 90, 3); // Move foundataion to the Right
-       RotateRight(.5, 24);   // Rotate Foundation 90 Degrees (24" is a guess, need to test for accuracy)
-       PIDDrivebackward(.5, 90, 4);  // Push Foundataion back to the wall   (4" is a guess, need to test for accuracy)
-       PIDDriveStrafeRight(.5, 90, 4); // Push foundation over the tae break plan
-
-     // Release Hooks
-        LHook.setPosition(.5);   // Move Arm hooks up nad out of the way
-        RHook.setPosition(.4);
-
-     // Drive to Parking Zone
-       PIDDriveForward(1, 90, 50);     // Drive robot forward 50" to land in parking zone
-
-
-
-
-
-
-
-
-
-      /*   Foundation Move: Test Case 2 - is an attempt to reduce the number of movements
-       *
-       *   Assumption:  We have already driven to the foundation and latched onto it.
-       *   1) Drive Forward command will move the foundation towards the driver station 2"
-       *   2) Rotate the entire foundation 24" (hopefully around 90 Degrees
-       *   3) Then drive it to the Field Wall, hopefully it will break the tape place
-       *   4) Release Hooks
-       *   5) Drive to Parking Zone
-       *
-     // Postion Foundation
-       PIDDriveForward(.5, 90, 2);  // move founddation towards wall
-       RotateRight(.5, 24);         // Rotate foundation
-       PIDDrivebackward(.5, 90, 24); //Push foundation to wall
-
-     // Release Hooks
-       LHook.setPosition(.5);   // Move Arm hooks up nad out of the way
-       RHook.setPosition(.4);
-
-     // Drive to Parking Zone
-       PIDDriveForward(1, 90, 50);   // Drive robot forward 50" to land in parking zone
-
-      */
-
-
-
-    }
-
-    // This section is a placeholder for Vision Detection of the Skystone
-    //  Methods we can choose from include:
-    //     1. Using REV3 Color/Distance Sensor
-    //     2. Using TensorFlor Vision
-    //     3. Using OpenCV Vision
-
-
-
-    // This second is a placeholder for Moving the Foundation to the build zone corner
-    //  Place frame work here
-
-
-
-    // This is the last placeholder for returning to mid-field to gain the parking points.
-    // Pace framework here.
-
-
 
 
 // Ends runOpMode..... END OF Autonomous Main Program.....
@@ -623,8 +552,8 @@ public class BlueQuarry_FOUNDATION extends LinearOpMode {
             //Set Motor Power  - This engages the Motors and starts the robot movements
             robot2.DriveRightFront.setPower(speed + correction);
             robot2.DriveLeftFront.setPower(speed + correction);
-            robot2.DriveRightRear.setPower(speed);
-            robot2.DriveLeftRear.setPower(speed);
+            robot2.DriveRightRear.setPower(speed + correction);
+            robot2.DriveLeftRear.setPower(speed + correction);
         }    // This brace closes out the while loop
 
         //Reset Encoders

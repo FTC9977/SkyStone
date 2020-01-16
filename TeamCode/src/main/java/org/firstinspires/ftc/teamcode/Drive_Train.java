@@ -1,34 +1,34 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
-import com.qualcomm.hardware.rev.RevTouchSensor;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+        import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
+        import com.qualcomm.hardware.rev.RevTouchSensor;
+        import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+        import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
+        import com.qualcomm.robotcore.hardware.DcMotor;
+        import com.qualcomm.robotcore.hardware.DcMotorSimple;
 //import com.qualcomm.robotcore.hardware.I2cDevice;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.TouchSensor;
-import com.qualcomm.robotcore.util.ElapsedTime;
+        import com.qualcomm.robotcore.hardware.Servo;
+        import com.qualcomm.robotcore.hardware.TouchSensor;
+        import com.qualcomm.robotcore.util.ElapsedTime;
 
-import java.util.Arrays;
+        import java.util.Arrays;
 
 
 @TeleOp(name="DriveTrain", group="calebs_robot")
 //@Disabled
 public class Drive_Train extends LinearOpMode {
     /*
-    *  Thing to fix
-    *
-    *
-    *       1. fix the strafing on the back two wheels
-    *       2. add commands to use the arm
-    *       3. chang the shafting on the arm
-    *       4. lower the sen of the controller
-    *
-    *
-    * */
+     *  Thing to fix
+     *
+     *
+     *       1. fix the strafing on the back two wheels
+     *       2. add commands to use the arm
+     *       3. chang the shafting on the arm
+     *       4. lower the sen of the controller
+     *
+     *
+     * */
 
     //skyHardwareMap robot2 = new skyHardwareMap();
 
@@ -85,7 +85,7 @@ public class Drive_Train extends LinearOpMode {
         LiftLeft.setDirection(DcMotorSimple.Direction.REVERSE);
 
 
-       rightBackWheel.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightBackWheel.setDirection(DcMotorSimple.Direction.REVERSE);
         rightFrontWheel.setDirection(DcMotorSimple.Direction.REVERSE);
 
 
@@ -93,14 +93,14 @@ public class Drive_Train extends LinearOpMode {
         blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.BEATS_PER_MINUTE_LAVA_PALETTE);
 
         waitForStart();
-         A = 0;
-         B = 0;
-         C = 0;
-         runtime.reset();
+        A = 0;
+        B = 0;
+        C = 0;
+        runtime.reset();
         while (opModeIsActive()) {
 
             if (gamepad1.x && (A <= 0)){
-               claw.setPosition(.1); // close
+                claw.setPosition(.1); // close
                 A = A +1;
                 blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
             }else if (gamepad1.x && (A >= 1)){
@@ -127,8 +127,8 @@ public class Drive_Train extends LinearOpMode {
             }
 
             if (gamepad1.a) {
-                 LiftLeft.setPower(.75);
-                 LiftRight.setPower(.75);
+                LiftLeft.setPower(.75);
+                LiftRight.setPower(.75);
             } else if (gamepad1.b){
                 LiftLeft.setPower(-.5);
                 LiftRight.setPower(-.5);
@@ -165,16 +165,16 @@ public class Drive_Train extends LinearOpMode {
                 ArmServo1.setPosition(.1);
                 ArmServo2.setPosition(.9);
             }
-             if ((gamepad1.right_trigger <= .5) && ( B == 0 ) ) {
-                 ArmServo1.setPosition(.9);
-                 ArmServo2.setPosition(.1);
-             }
+            if ((gamepad1.right_trigger <= .5) && ( B == 0 ) ) {
+                ArmServo1.setPosition(.9);
+                ArmServo2.setPosition(.1);
+            }
 
-             if (Touch.isPressed()){
-                 blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
-             } else if ((Touch.isPressed()== false) && A <= 0){
-                 blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
-             }
+            if (Touch.isPressed()){
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
+            } else if ((Touch.isPressed()== false) && A <= 0){
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
+            }
 
             if ((runtime.seconds() >= 90) &&  runtime.seconds() <= 99) {
                 blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.COLOR_WAVES_OCEAN_PALETTE);

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -14,7 +15,7 @@ import java.util.Arrays;
 
 
 @TeleOp(name="MecanumTeleOP", group="csSS-Competition")
-//@Disabled
+@Disabled
 public class BasicTeleop extends LinearOpMode {
 
     private static final double TRIGGERTHRESHOLD = .2;

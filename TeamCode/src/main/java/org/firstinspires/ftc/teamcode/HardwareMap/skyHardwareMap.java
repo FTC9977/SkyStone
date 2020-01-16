@@ -66,6 +66,8 @@ public class skyHardwareMap {
     public ColorSensor sensorColorR, sensorColorL          = null;
     public DistanceSensor sensorDistanceR, sensorDistanceL = null;
 
+    public Servo LHook,RHook             = null;
+
 
 
 
@@ -132,6 +134,9 @@ public class skyHardwareMap {
 
         GreenArmRight   = hwMap.servo.get("GAR");
         PurpleArmLeft   = hwMap.servo.get("PAL");
+        LHook           = hwMap.servo.get("LHook");
+        RHook           = hwMap.servo.get("RHook");
+
 
         sensorColorR    = hwMap.get(ColorSensor.class, "SCDR");  // Right colorsensor
         sensorColorL    = hwMap.get(ColorSensor.class,"SCDL");  // Left colorsensor

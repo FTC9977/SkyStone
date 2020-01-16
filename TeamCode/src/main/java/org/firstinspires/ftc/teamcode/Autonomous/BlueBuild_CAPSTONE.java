@@ -5,6 +5,7 @@ import android.graphics.Color;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -55,8 +56,8 @@ import android.view.View;
  */
 
 
-@Autonomous(name="Blue Build", group = "CS9977-test")
-
+@Autonomous(name="Blue Build_CAPSTONE", group = "calebs-robot")
+@Disabled
 public class BlueBuild_CAPSTONE extends LinearOpMode {
 
 
