@@ -11,11 +11,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.Axis;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.DriveTrain.PIDController;
 import org.firstinspires.ftc.teamcode.HardwareMap.CSimuHardwareMap;
-import com.qualcomm.robotcore.hardware.PIDCoefficients;
 
 /* 10/29/19 - Good Lesson Learned here....
 *
@@ -49,9 +47,9 @@ import com.qualcomm.robotcore.hardware.PIDCoefficients;
  */
 
 
-@Autonomous(name="PID_TESTING", group = "pid-test")
+@Autonomous(name="ENCODER_TESTING", group = "pid-test")
 
-public class PID_TESTING extends LinearOpMode {
+public class ENCODER_TESTING extends LinearOpMode {
 
 
     // Decalre hardware
@@ -104,26 +102,36 @@ public class PID_TESTING extends LinearOpMode {
      // 90 Degrees = Straight line
 
 
-     // Drive Forward @ 50% Power, 90 degrees, Distance of 24"
+
+  /*  GoBilda Motor Encoder Mis-Wiring Testing Statement
+   *
+   *   There is an issue with GoBilda Manufacturing proccess where the Motor Encoder wires were
+   *   incorrectly mis-wired.
+   *
+   *   Symptoms include:
+   *    - motor Encoder tick counts decreasing vs increasing
+   *    - irregular driving patterns during Autonomous Code Execution
+   *    - PID CONTROL Algorithms not functioning properly
+   *
+   *   FTC Forum Post identifying this issue:
+   *    https://ftcforum.firstinspires.org/forum/ftc-technology/75167-warning-about-gobilda-motor-directions
+   *
+   *  To Test:
+   *    1. Set robot up on blocks or Floor
+   *    2. Run the Motors at slow speed (25% motor power)
+   *    3. Instruct robot to run a LONG distance (were using 200" inches)
+   *    4. Telemetry will be displayed on the Driver Station phone
+   *        - Verify all 4 motors are incrementing in counts
+   *        - Any Motors that are "decreasing" in values would indicate a motor that is mis-wired
+   *
+   *    5. Repair or Replace motor as needed
+   *
+   */
+
+    // Command below assumes robot is on block, NOT ON THE FIELD!!!!!!!!!!!!!!
 
 
-
-      PIDDriveForward(.75,90,48); // Drive Forward @ 75% power, 90 degrees, 24"
-    // RotateRight(.5,2);
-     //PIDDriveForward(1,90,24); // Drive Forward at 100% power, 90 degress, 24"
-
-     //PIDDrivebackward(.5,90,12); //Drive Backward @ 50% power, 90 degrees, 12"
-     //PIDDrivebackward(.75, 90, 24); //Drive backward @ 75% power, 90 degrees, 24"
-     //PIDDrivebackward(1, 90, 24); //Drive backward @100% power, 90 degrees, 24"
-
-     //PIDDriveStrafeRight(.50, 90, 12); //strafe right @ 50% power, 90 degrees, 12"
-     //PIDDriveStrafeRight(.75, 90, 24); //strafe right @ 75% power, 90 degrees, 24"
-     //PIDDriveStrafeRight(1, 90, 24); //strafe right @ 100% power, 90 degrees, 24"
-
-     //PIDDriveStrafeLeft(.50, 90, 12); //strafe left @ 50% power, 90 degrees, 12"
-     //PIDDriveStrafeLeft(.75, 90, 24); //strafe left @ 75% power, 90 degrees, 24"
-     //PIDDriveStrafeLeft(1,90, 24); //strafe left @ 100% power, 90 degrees, 24"
-
+      PIDDriveForward(.25,90,200); // Drive Forward @ 25% power, 90 degrees, 200"
 
 
 
@@ -310,6 +318,16 @@ public class PID_TESTING extends LinearOpMode {
             robot2.DriveLeftFront.setPower(speed + correction );
             robot2.DriveRightRear.setPower(speed + correction);
             robot2.DriveLeftRear.setPower(speed + correction );
+
+            // This telemetry is being used to test the GOBILD Motor Encorder Mis-Wiring issues
+            //
+            //  All Motors  Encoder Ticks should be increasing, nNOT decreasing
+            //    Any motors that are found to be decreasing has a mis-wired Motor Encoder
+            telemetry.addData("DriveRightFront CPI: ", robot2.DriveRightFront.getCurrentPosition()/COUNTS_PER_INCH);
+            telemetry.addData("DriveRightRear CPI: ", robot2.DriveRightRear.getCurrentPosition()/COUNTS_PER_INCH);
+            telemetry.addLine(" ---------------------");
+            telemetry.addData("DriveLeftFront CPI: ", robot2.DriveLeftFront.getCurrentPosition()/COUNTS_PER_INCH);
+            telemetry.addData("DriveLeftRear CPI: ", robot2.DriveLeftRear.getCurrentPosition()/COUNTS_PER_INCH);
         }    // This brace closes out the while loop
 
         //Reset Encoders
