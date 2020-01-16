@@ -128,7 +128,7 @@ public class ENCODER_TESTING extends LinearOpMode {
    *
    */
 
-    // Command below assumes robot is on block, NOT ON THE FIELD!!!!!!!!!!!!!!
+    // Command below assumes robot is on blocks, NOT ON THE FIELD!!!!!!!!!!!!!!
 
 
       PIDDriveForward(.25,90,200); // Drive Forward @ 25% power, 90 degrees, 200"
