@@ -4,6 +4,8 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.PIDCoefficients;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
@@ -44,13 +46,13 @@ import java.util.Locale;
 public class CSimuHardwareMap {
 
 
-    public DcMotor DriveLeftFront = null;
-    public DcMotor DriveLeftRear = null;
-    public DcMotor DriveRightFront = null;
-    public DcMotor DriveRightRear = null;
+    public DcMotorEx DriveLeftFront = null;
+    public DcMotorEx DriveLeftRear = null;
+    public DcMotorEx DriveRightFront = null;
+    public DcMotorEx DriveRightRear = null;
 
 
-    private DcMotor motor;
+    private DcMotorEx motor;
 
 
 
@@ -70,10 +72,10 @@ public class CSimuHardwareMap {
         // Define and Initialize Motors
 
 
-        DriveLeftFront = hwMap.dcMotor.get("LF");
-        DriveLeftRear = hwMap.dcMotor.get("LR");
-        DriveRightFront = hwMap.dcMotor.get("RF");
-        DriveRightRear = hwMap.dcMotor.get("RR");
+        DriveLeftFront = (DcMotorEx)hwMap.dcMotor.get("LF");
+        DriveLeftRear = (DcMotorEx)hwMap.dcMotor.get("LR");
+        DriveRightFront = (DcMotorEx)hwMap.dcMotor.get("RF");
+        DriveRightRear = (DcMotorEx)hwMap.dcMotor.get("RR");
 
         DriveRightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         DriveRightRear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
