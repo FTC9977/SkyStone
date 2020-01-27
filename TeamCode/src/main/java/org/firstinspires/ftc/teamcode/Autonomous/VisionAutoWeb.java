@@ -303,6 +303,8 @@ public class VisionAutoWeb extends RobotWebcam {
         */
     }
 
+    
+
     public void skystonePos2() {
         // This method will drive the robot to Skyston Positon 2
         // Blinked in:  Change color SOLID BLUE to indicate we successfully Drove to the stone
