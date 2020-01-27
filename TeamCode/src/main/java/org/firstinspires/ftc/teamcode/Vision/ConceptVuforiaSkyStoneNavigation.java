@@ -45,11 +45,14 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import java.util.ArrayList;
 import java.util.List;
 
+
+
 import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.YZX;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.EXTRINSIC;
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.BACK;
+import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.FRONT;
 
 /**
  * This 2019-2020 OpMode illustrates the basics of using the Vuforia localizer to determine
@@ -82,7 +85,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
  */
 
 
-@TeleOp(name="SKYSTONE Vuforia Nav", group ="Concept")
+@TeleOp(name="Concept: SKYSTONE Vuforia Nav", group ="csnull")
 //@Disabled
 public class ConceptVuforiaSkyStoneNavigation extends LinearOpMode {
 
@@ -150,6 +153,7 @@ public class ConceptVuforiaSkyStoneNavigation extends LinearOpMode {
 
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
         parameters.cameraDirection   = CAMERA_CHOICE;
+
 
         //  Instantiate the Vuforia engine
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
@@ -325,6 +329,12 @@ public class ConceptVuforiaSkyStoneNavigation extends LinearOpMode {
             for (VuforiaTrackable trackable : allTrackables) {
                 if (((VuforiaTrackableDefaultListener)trackable.getListener()).isVisible()) {
                     telemetry.addData("Visible Target", trackable.getName());
+
+
+                    if (trackable.getName().equals("Stone Target")) {
+                        telemetry.addLine("Stone Target is Visible");
+                    }
+
                     targetVisible = true;
 
                     // getUpdatedRobotLocation() will return null if no new information is available since
@@ -338,19 +348,35 @@ public class ConceptVuforiaSkyStoneNavigation extends LinearOpMode {
             }
 
             // Provide feedback as to where the robot is located (if we know).
+
+            String positionSkystone= "";   // Holds the position of the skystone; this defaults to "Empty"
             if (targetVisible) {
                 // express position (translation) of robot in inches.
                 VectorF translation = lastLocation.getTranslation();
                 telemetry.addData("Pos (in)", "{X, Y, Z} = %.1f, %.1f, %.1f",
                         translation.get(0) / mmPerInch, translation.get(1) / mmPerInch, translation.get(2) / mmPerInch);
 
+
+                double xPosition = translation.get(1); //  0 = X Value(s), 1 = Y value(s), 2 = Z value(s)
+
+
+
+                // Sample only, will need to modify according to your robot
+                if(xPosition > 7) {   // -10 is an arbitrary #, we'll have to figure this out... and if we see all 3 targets at ones, then we'll need to expand the if..else statements
+                    positionSkystone = "left";
+                } else {
+                    positionSkystone = "center";
+                }
+
                 // express the rotation of the robot in degrees.
                 Orientation rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
                 telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f", rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
             }
             else {
+                positionSkystone = "right";
                 telemetry.addData("Visible Target", "none");
             }
+            telemetry.addData("Skystone Position: ", positionSkystone);
             telemetry.update();
         }
 

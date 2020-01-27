@@ -1,10 +1,9 @@
 package org.firstinspires.ftc.teamcode.Autonomous;
 
 
-
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -12,54 +11,29 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+
+
+import org.firstinspires.ftc.teamcode.DbgLog;
 import org.firstinspires.ftc.teamcode.DriveTrain.PIDController;
-import org.firstinspires.ftc.teamcode.HardwareMap.CSimuHardwareMap;
-
-/* 10/29/19 - Good Lesson Learned here....
-*
-*   "Even the seasoned Programmer/Engineer can sometimes forget the basics....."
-*
-*  Problem:  When we executed this code, it threw an error indicating that we needed to
-*            setTargetPosition() before engaging the setMode(DcMotor.RunMode.RUN_TO_POSITION)
-*
-*  Troubleshooting:
-*     We attempted many things, including:
-*           1. Complete reconfigure of the RC Configuration file
-*           2. manually adding the setTargetPosition(0) within the method
-*           3. Manipulate a known working PIDDrieForward() method used in the 2018 State Comps
-*
-*  Resolution:
-*       Caleb to the rescue!   He discovered the following code segment was wrong, corrected it and
-*       all the errors went away, robot exeuted the commands without issue and worked perfectly.
-*
-*  Wrong Command:
-*       @Autonomous(name="Blue Build, group=AutonomousData.OFFICIAL_GROUP)
-*
-*  Corrected Command:
-*       @Autonomous(name="Blue Build", group = "CS9977-test")
-*
-*  Summary:
-*       The group= " " statement should be named the same as the Robot Controller Config Name on the phone.
-*
-*        The AutonomousData.OFFICIAL_GROUP was ported from the 2018 season, and was not properly functioning.   We will delete it
-*        and or correct that file contents to match the 2019-20 SkyStone Season parameters.
-*
- */
+import org.firstinspires.ftc.teamcode.HardwareMap.Robot;
+import org.firstinspires.ftc.teamcode.HardwareMap.skyHardwareMap2;                      //  ** Using this only for the test robot.  For COMPETITION rotobit, change to skyHardwareMap()
 
 
-@Autonomous(name="ENCODER_TESTING", group = "pid-test")
+@Autonomous(name="AutoVision", group="csnull")
 
-public class ENCODER_TESTING extends LinearOpMode {
+public class VisionAuto extends Robot {
 
+    VuforiaStuff.skystonePos pos;
+    int stoneDiff, stoneONE, stoneTWO;
+    skyHardwareMap2 robot2 = new skyHardwareMap2();     //  Setup file for all DC Motors, IMU, etc...  ** Using this HwMap only for Test robot.  Competition robot will use skyHardwareMap();
 
-    // Decalre hardware
-
-
-    CSimuHardwareMap robot2 = new CSimuHardwareMap();
     ElapsedTime runtime = new ElapsedTime();
 
 
+    // Created Rev Robotics BlinkIN instances
 
+    RevBlinkinLedDriver blinkinLedDriver;
+    RevBlinkinLedDriver.BlinkinPattern pattern;
 
 
 
@@ -71,104 +45,213 @@ public class ENCODER_TESTING extends LinearOpMode {
 
     //Define Drivetrain Variabeles
 
-
-    /*   Caluclating Gear Reduction Variable
-
-       Example 1:  Overdrive Example  (Geared up)
-         Driver Gear = 45 tooth
-         Driven Gear = 35 tooth
-
-         35/45 = .77  or 1:0.77 Over Drive     (DRIVE_GEAR_REDUCTION = .77)
-
-
-
-       Example 2: Reduction (Geared down)
-         Driver Gear = 35 tooth
-         Driven Gear = 45 tooth
-
-         45/35 =  1.28 or 1:1.28 Reduction      (DRIVE_GEAR_REDUCTION = 1.28)
-
-
-
-       Example 3: Overdrive Example  (Geared up)
-          Driver Sprocket = 32 tooth
-          Driven Sprocket = 16 toot
-
-          16/32 = .5   or   1: 0.5 Over Drive   (DRIVE_GEAR_REDUCTION = .50)
-
-
-          Thus, if
-             Motors are 1:1, set DRIVE_GEAR_REDUCTION = 1
-             Motors are gearned down (reduction) , set DRIVE_GEAR_REDUCTION = value calculated      generally > 1.0 in value)
-             Motors are gear UP (Overdrive), set DRIVE_GEAR_REDUCTION = value calculated            (generally < 1.0 in value)
-
-     */
-
-    static final double COUNTS_PER_MOTOR_REV = 753.2;   // Andymark 40 Motor Tick Count
-    static final double DRIVE_GEAR_REDUCTION = .50;    // This is < 1.0 if motors are geared up (Overdrive) or > 1.0 if motors are geared down (Reduction)
-    static final double WHEEL_DIAMETER_INCHES = 4.0;   // For figuring out circumfrance
+    static final double COUNTS_PER_MOTOR_REV = 537.6;                           // GoBilda 5202 YellowJacket 312RPM Motor
+    static final double DRIVE_GEAR_REDUCTION = 1;                             // This is > 1.0 if motors are geared up ____  Using OVerdrive gearing with Pico Uno boxes  40 gear to 35 gear over-drive
+    static final double WHEEL_DIAMETER_INCHES = 4.0;                            // For figuring out circumfrance
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
 
- @Override
- public void runOpMode() throws InterruptedException {
-
-     robot2.init(hardwareMap);
-     setupIMU();
 
 
+    @Override
+    public void runOpMode() throws InterruptedException {
+        robotInit();                                        // Used to Setup Vuforia Parameters
 
-     // This chunk of code gets around the Motorola E4 Disconnect bug.  Should be fixed in SDK 5.3, but adding it as a "backup - JUST IN CASE!!!"
-     //
-     while (!opModeIsActive() && !isStopRequested()) {
-         telemetry.addData("status", "waiting for start command...");
-         telemetry.update();
-     }
+        pos = vuforiaStuff.vuforiascan(true, false);
+        switch (pos) {
+            case LEFT:
+                telemetry.addLine("Skystone position is LEFT");
+                telemetry.update();
+                sleep(5000);
+                stoneDiff = 0;
+                stoneONE = 1;           // First Skystone is in Position 1
+                stoneTWO = 4;           // Second Skystone is in Position 4 (2nd Left Position)
+                // Blinked in:  Change color Flashing GREEN to indicate we found the stone
+                break;
+            case CENTER:
+                telemetry.addLine("Skystone position is CENTER");
+                telemetry.update();
+                sleep(5000);
+                stoneDiff = 16;
+                stoneONE = 2;           // First Skystone is in Position 2
+                stoneTWO = 5;           // Second Skytone is in Position 5 (2nd Center Position)
+                // Blinked in:  Change color Flashing GREEN to indicate we found the stone
+                break;
+            case RIGHT:
+                telemetry.addLine("Skystone Position is RIGHT");
+                telemetry.update();
+                sleep(500);
+                stoneDiff = 20;
+                stoneONE = 3;           // First Skystone is in Position 3
+                stoneTWO = 6;           // Second Skystone is in Postion 6 (2nd Right Positon)
+                // Blinked in:  Change color Flashing GREEN to indicate we found the stone
+                break;
+        }
 
-     waitForStart();
-
-     // Using Advacned PID Tuning via REV COntrol Hub
-     //   Reference URL: https://github.com/FIRST-Tech-Challenge/SkyStone/wiki/Changing-PID-Coefficients
-     //
-     // Example Command:
-     // robot2.DriveLeftFront.setVelocityPIDFCoefficients(1.26, .126, 0, 12.6);
-
-     // 90 Degrees = Straight line
-
-
-
-  /*  GoBilda Motor Encoder Mis-Wiring Testing Statement
-   *
-   *   There is an issue with GoBilda Manufacturing proccess where the Motor Encoder wires were
-   *   incorrectly mis-wired.
-   *
-   *   Symptoms include:
-   *    - motor Encoder tick counts decreasing vs increasing
-   *    - irregular driving patterns during Autonomous Code Execution
-   *    - PID CONTROL Algorithms not functioning properly
-   *
-   *   FTC Forum Post identifying this issue:
-   *    https://ftcforum.firstinspires.org/forum/ftc-technology/75167-warning-about-gobilda-motor-directions
-   *
-   *  To Test:
-   *    1. Set robot up on blocks or Floor
-   *    2. Run the Motors at slow speed (25% motor power)
-   *    3. Instruct robot to run a LONG distance (were using 200" inches)
-   *    4. Telemetry will be displayed on the Driver Station phone
-   *        - Verify all 4 motors are incrementing in counts
-   *        - Any Motors that are "decreasing" in values would indicate a motor that is mis-wired
-   *
-   *    5. Repair or Replace motor as needed
-   *
-   */
-
-    // Command below assumes robot is on blocks, NOT ON THE FIELD!!!!!!!!!!!!!!
+        /*if (pos == VuforiaStuff.skystonePos.LEFT) {
+            telemetry.addLine("Were in the IF poss == VuforiaStuff.skystonePos.LEFT section");
+            telemetry.update();
+        } else {
+            telemetry.addLine("Were in the 'else' portion of the IF poss == VuforiaStuff.skystonePos.LEFT section");
+            telemetry.update();
+        } */
 
 
-      PIDDriveForward(.25,90,200); // Drive Forward @ 25% power, 90 degrees, 200"
+        // SET INITIAL BlinkIn Color to Chasing Rainbow.
+
+
+        // Setup Drive Commands to get to 1 out of 6 stone Positions
+
+        if(stoneONE == 1) {
+            telemetry.addLine("Driving to Skystone Position 1");
+            DbgLog.msg("--------------");
+            DbgLog.msg("   Driving to Skystone Position 1");
+            DbgLog.msg("--------------");
+            skystonePos1();             // Call Method to drive to position 1
+            grabStone();                // Call Method to Grab stone
+            deliverStone1();            // Call method to Drive to Foundataion, move it, deliver stone, and drive to bridge and park
+        } else if (stoneONE == 2) {
+            telemetry.addLine(" Driving to Skystone Position 2");
+            DbgLog.msg("--------------");
+            DbgLog.msg("   Driving to Skystone Position 2");
+            DbgLog.msg("--------------");
+            skystonePos2();             // Call Method to drive to position 1
+            grabStone();                // Call Method to Grab Stone
+            deliverStone2();            // Call Method to Drive to Foundation, move it, deliver stone, and drive to bridge and park
+        } else {
+            telemetry.addLine("Driving to Skystone Position 3");
+            DbgLog.msg("--------------");
+            DbgLog.msg("   Driving to Skystone Position 3");
+            DbgLog.msg("--------------");
+            skystonePos3();             // Call Method to drive to position 3
+            grabStone();                // Call Method to Grab Stone
+            deliverStone3();            // Call Method to Drive to Foundation, move it, deliver stone, and drive to bridge and park
+         }
 
 
 
- } // Ends runOpMode
+    }     //  END OF MAIN PROGRAM
+
+
+    // Methods to drive to Stones
+    /*
+ *  Skystone Position Definitions
+ *
+ *
+ *																								      |
+ *	   																							      |
+ *       																							  |
+ *      [ bridge ]    [Position1]  [Position2] [Position 3]  [Position 4]  [Position 5] [Position 6]  |
+ *  																							 	  |   Perimeter Wall
+ *  																							 	  |
+ *  																							   /  |
+ *  																					  	      /	  |
+ *  																					         /	  |
+ *  																					        /	  |
+ *  			--------------------------------------------------------------------------------------|
+ *
+ */
+
+    public void skystonePos1() {
+        // This method will drive the robot to Skystone Position 1 (Closest to the bridge)
+        // Blinked in:  Change color SOLID BLUE to indicate we successfully Drove to the stone
+    }
+
+    public void skystonePos2() {
+        // This method will drive the robot to Skyston Positon 2
+        // Blinked in:  Change color SOLID BLUE to indicate we successfully Drove to the stone
+    }
+
+    public void skystonePos3() {
+        // This method will drive the robot to Skystone Position 3
+        // Blinked in:  Change color SOLID BLUE to indicate we successfully Drove to the stone
+    }
+
+    public void skystonePos4() {
+        // This method will drive the robot to Skystone Position 4
+        // Blinked in:  Change color SOLID BLUE to indicate we successfully Drove to the stone
+    }
+
+    public void skystonePos5() {
+        // This method will drive the robot to Skystone Position 5
+        // Blinked in:  Change color SOLID BLUE to indicate we successfully Drove to the stone
+    }
+
+    public void skystonePos6() {
+        // This method will drive the robot to Skystone Position 6
+        // Blinked in:  Change color SOLID BLUE to indicate we successfully Drove to the stone
+    }
+
+
+    public void grabStone() {
+        //  This method will be used to grab the stone  and prepare it for delivery
+    }
+
+    public void foundationGrab(){
+        // This method will be used to grab the Foundation an move it to the correct area
+        // Change BlinkIN color to SOLID YELLOW to signal foundation move
+        // First grab foundation
+        // Rotate Foundation
+        // Slide Foundation to Left
+
+    }
+
+    public void deliverStone1() {
+        // This method will deliver the stone from Position 1
+        // Rotation Robot to orient the stone facing the foundation
+        // Then drive forward to deliver the stone
+        // Grab Foundation and move                 call foundationGrab()
+        // Place stone
+        // Drive to Skybridge and park
+    }
+
+    public void deliverStone2() {
+        // This method will deliver the stone from Position 2
+        // Rotation Robot to orient the stone facing the foundation
+        // Then drive forward to deliver the stone
+        // Grab Foundation and move                 call foundationGrab()
+        // Place stone
+        // Drive to Skybridge and park
+    }
+
+    public void deliverStone3() {
+        // This method will deliver the stone from Position 3
+        // Rotation Robot to orient the stone facing the foundation
+        // Then drive forward to deliver the stone
+        // Grab Foundation and move                 call foundationGrab()
+        // Place stone
+        // Drive to Skybridge and park
+    }
+
+    public void deliverStone4() {
+        // This method will deliver the stone from Position 4
+        // Rotation Robot to orient the stone facing the foundation
+        // Then drive forward to deliver the stone
+        // Grab Foundation and move                 call foundationGrab()
+        // Place stone
+        // Drive to Skybridge and park
+    }
+
+    public void deliverStone5() {
+        // This method will deliver the stone from Position 5
+        // Rotation Robot to orient the stone facing the foundation
+        // Then drive forward to deliver the stone
+        // Grab Foundation and move
+        // Place stone
+        // Drive to Skybridge and park
+    }
+
+    public void deliverStone6() {
+        // This method will deliver the stone from Position 6
+        // Rotation Robot to orient the stone facing the foundation
+        // Then drive forward to deliver the stone
+        // Grab Foundation and move                 call foundationGrab()
+        // Place stone
+        // Drive to Skybridge and park
+    }
+
+
+
+    // These Methods below control all motor Movements via PID
 
     public void setupIMU() {
         // Initalize IMU
@@ -216,12 +299,7 @@ public class ENCODER_TESTING extends LinearOpMode {
         // returned as 0 to +180 or 0 to -180 rolling back to -179 or +179 when rotation passes
         // 180 degrees. We detect this transition and track the total cumulative angle of rotation.
 
-        // Note:  If your huv is mounted vertically, remap the IMU axes so that the z-axis points
-        //        upward (normal to the floo) using a command like:
-        // Orientation angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES);
-
         Orientation angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-
 
 
 
@@ -351,16 +429,6 @@ public class ENCODER_TESTING extends LinearOpMode {
             robot2.DriveLeftFront.setPower(speed + correction );
             robot2.DriveRightRear.setPower(speed + correction);
             robot2.DriveLeftRear.setPower(speed + correction );
-
-            // This telemetry is being used to test the GOBILD Motor Encorder Mis-Wiring issues
-            //
-            //  All Motors  Encoder Ticks should be increasing, nNOT decreasing
-            //    Any motors that are found to be decreasing has a mis-wired Motor Encoder
-            telemetry.addData("DriveRightFront CPI: ", robot2.DriveRightFront.getCurrentPosition()/COUNTS_PER_INCH);
-            telemetry.addData("DriveRightRear CPI: ", robot2.DriveRightRear.getCurrentPosition()/COUNTS_PER_INCH);
-            telemetry.addLine(" ---------------------");
-            telemetry.addData("DriveLeftFront CPI: ", robot2.DriveLeftFront.getCurrentPosition()/COUNTS_PER_INCH);
-            telemetry.addData("DriveLeftRear CPI: ", robot2.DriveLeftRear.getCurrentPosition()/COUNTS_PER_INCH);
         }    // This brace closes out the while loop
 
         //Reset Encoders
@@ -378,6 +446,96 @@ public class ENCODER_TESTING extends LinearOpMode {
     }   // END OF PIDDriveForward
 
     public void PIDDrivebackward(double speed, double angle, int distance) {    // Added: 1/18/19
+
+        // This is an attempt to use PID only, no encoders
+
+
+        /* Things to pass the Method
+         *
+         * 1. speed
+         * 2. Angle
+         * 3. distance
+         *
+         * Example:  PIDDriveForward(.50,90, 24);        // Drive robot forward in a straight line for 4" @ 50% Power
+         */
+
+        // Setup Straight Line Driving
+
+        pidDrive.setSetpoint(0);
+        pidDrive.setOutputRange(0, speed);
+        pidDrive.setInputRange(-angle, angle);
+        pidDrive.enable();
+
+        // Use PID with imu input to drive in a straight line.
+        double correction = pidDrive.performPID(getAngle2());
+
+
+        //Initialize Mecanum Wheel DC Motor Behavior
+        setZeroPowerBrakes();   // Set DC Motor Brake Behavior
+
+
+        //  Reset Encoders:    Alternate way:  DriveRightFrontEncoder.reset();
+        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        robot2.DriveRightFront.setTargetPosition(0);
+        robot2.DriveRightRear.setTargetPosition(0);
+        robot2.DriveLeftFront.setTargetPosition(0);
+        robot2.DriveLeftRear.setTargetPosition(0);
+
+        // Set RUN_TO_POSITION
+        robot2.DriveRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot2.DriveRightRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        sleep(500);
+
+        // Stop Motors and set Motor Power to 0
+        //PIDstopALL()
+        robot2.DriveRightFront.setPower(0);
+        robot2.DriveLeftFront.setPower(0);
+        robot2.DriveRightRear.setPower(0);
+        robot2.DriveLeftRear.setPower(0);
+
+
+        double InchesMoving = (distance * COUNTS_PER_INCH);
+
+
+        // Set Target
+        robot2.DriveRightFront.setTargetPosition((int) -InchesMoving);
+        robot2.DriveLeftFront.setTargetPosition((int) -InchesMoving);
+        robot2.DriveRightRear.setTargetPosition((int) -InchesMoving);
+        robot2.DriveLeftRear.setTargetPosition((int) -InchesMoving);
+
+
+        while (robot2.DriveRightFront.isBusy() && robot2.DriveRightRear.isBusy()
+                && robot2.DriveLeftFront.isBusy() && robot2.DriveLeftRear.isBusy()) {
+
+
+            //Set Motor Power  - This engages the Motors and starts the robot movements
+            robot2.DriveRightFront.setPower(speed + correction);
+            robot2.DriveLeftFront.setPower(speed + correction);
+            robot2.DriveRightRear.setPower(speed);
+            robot2.DriveLeftRear.setPower(speed);
+        }    // This brace closes out the while loop
+
+        //Reset Encoders
+        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        //PIDstopALL()
+        robot2.DriveRightFront.setPower(0);
+        robot2.DriveLeftFront.setPower(0);
+        robot2.DriveRightRear.setPower(0);
+        robot2.DriveLeftRear.setPower(0);
+
+    }   // END OF PIDDriveBackward
+
+    public void PIDDrivebackward2(double speed, double angle, int distance) {    // Added: 1/18/19
 
         // This is an attempt to use PID only, no encoders
 
@@ -788,3 +946,5 @@ public class ENCODER_TESTING extends LinearOpMode {
     }
 
 }
+
+

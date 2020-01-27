@@ -24,6 +24,6 @@ public class UniversalConstants {
     final static int NV40_COUNTS_PER_MOTOR_REV = 1120;       // NeveRest 40 Motor Tick Count
     final static int NV60_COUNTS_PER_MOTOR_REV = 1680;       // NeveRest 60 Motor Tick Count
 
-    final double YELLLOW_PLANET_223RPM = 753.2;         // GoBilda YellowJack Planetary 223 RPM
-    final double YELLOW_PLANET_312RPM = 537.6;          // GoBilda Yerll
+
+    final double YELLOW_PLANET_312RPM = 543.2;          // GoBilda Yerll
 }

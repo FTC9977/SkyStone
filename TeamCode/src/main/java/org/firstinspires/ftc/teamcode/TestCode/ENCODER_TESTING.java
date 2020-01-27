@@ -1,7 +1,8 @@
-package org.firstinspires.ftc.teamcode.Autonomous;
+package org.firstinspires.ftc.teamcode.TestCode;
+
+
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -14,7 +15,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.DriveTrain.PIDController;
 import org.firstinspires.ftc.teamcode.HardwareMap.CSimuHardwareMap;
-import org.firstinspires.ftc.teamcode.HardwareMap.skyHardwareMap;
 
 /* 10/29/19 - Good Lesson Learned here....
 *
@@ -45,25 +45,22 @@ import org.firstinspires.ftc.teamcode.HardwareMap.skyHardwareMap;
 *        The AutonomousData.OFFICIAL_GROUP was ported from the 2018 season, and was not properly functioning.   We will delete it
 *        and or correct that file contents to match the 2019-20 SkyStone Season parameters.
 *
-*
-*/
+ */
 
-//@Disabled    // DISABLED AS Program
-@Autonomous(name="CSimu", group = "imu-test")     // change group name back to CS9977-test when done
+@Disabled       // UNCOMMENT OUT TO RESTORE to PHONE
+@Autonomous(name="ENCODER_TESTING", group = "pid-test")
 
-public class CSimu extends LinearOpMode {
+public class ENCODER_TESTING extends LinearOpMode {
 
 
     // Decalre hardware
+
 
     CSimuHardwareMap robot2 = new CSimuHardwareMap();
     ElapsedTime runtime = new ElapsedTime();
 
 
-    // Created Rev Robotics BlinkIN instances
 
-    RevBlinkinLedDriver blinkinLedDriver;
-    RevBlinkinLedDriver.BlinkinPattern pattern;
 
 
 
@@ -75,10 +72,87 @@ public class CSimu extends LinearOpMode {
 
     //Define Drivetrain Variabeles
 
-    static final double COUNTS_PER_MOTOR_REV =1120;   // Andymark 40 Motor Tick Count
-    static final double DRIVE_GEAR_REDUCTION = 1;    // This is > 1.0 if motors are geared up ____  Using OVerdrive gearing with Pico Uno boxes  40 gear to 35 gear over-drive
+
+    /*   Caluclating Gear Reduction Variable
+
+       Example 1:  Overdrive Example  (Geared up)
+         Driver Gear = 45 tooth
+         Driven Gear = 35 tooth
+
+         35/45 = .77  or 1:0.77 Over Drive     (DRIVE_GEAR_REDUCTION = .77)
+
+
+
+       Example 2: Reduction (Geared down)
+         Driver Gear = 35 tooth
+         Driven Gear = 45 tooth
+
+         45/35 =  1.28 or 1:1.28 Reduction      (DRIVE_GEAR_REDUCTION = 1.28)
+
+
+
+       Example 3: Overdrive Example  (Geared up)
+          Driver Sprocket = 32 tooth
+          Driven Sprocket = 16 toot
+
+          16/32 = .5   or   1: 0.5 Over Drive   (DRIVE_GEAR_REDUCTION = .50)
+
+
+          Thus, if
+             Motors are 1:1, set DRIVE_GEAR_REDUCTION = 1
+             Motors are gearned down (reduction) , set DRIVE_GEAR_REDUCTION = value calculated      generally > 1.0 in value)
+             Motors are gear UP (Overdrive), set DRIVE_GEAR_REDUCTION = value calculated            (generally < 1.0 in value)
+
+     */
+
+    static final double COUNTS_PER_MOTOR_REV = 537.6;   // Andymark 40 Motor Tick Count
+    static final double DRIVE_GEAR_REDUCTION = 1;    // This is < 1.0 if motors are geared up (Overdrive) or > 1.0 if motors are geared down (Reduction)
     static final double WHEEL_DIAMETER_INCHES = 4.0;   // For figuring out circumfrance
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
+
+    /*  Calculating COUNTS_PER_INCH
+     *
+     *    Using the defined variables able, as the example:
+     *
+     *    COUNTS_PER_MOTOR_REV = 753.2
+     *    DRIVE_GREAR_REDUCTION = .50
+     *    WHEEL_DIAMETER_INCHES = 4.0
+     *
+     *   then
+     *      CPI = ((753.2 * .50) / (4.0 *3.1415))
+     *          = (376.6) / (1.273277096928219)
+     *          = 295.77225
+     *
+     *  Thus, to move forward 1" takes approximately 295.77225 ticks    (Remeber we are using OverDrive)
+     *
+     *
+     * Example 2:  Assume a 1:1 Gear ratio  (Yellow Jacket 223RPM Example)
+     *
+     *          COUNTS_PER_MOTOR_REV = 753.2
+     *          DRIVE_GREAR_REDUCTION = .50
+     *          WHEEL_DIAMETER_INCHES = 4.0
+     *
+     *   then
+     *      CPI = ((753.2 * 1) / (4.0 *3.1415))
+     *          = (753.2) / (1.273277096928219)
+     *          = 591.5445
+     *
+     *   Thus, to move forward 1" takes approximately 591.5445 ticks
+     *
+     *
+     * Example 2:  Assume a 1:1 Gear ratio  (Neverest40 Motor)
+     *
+     *          COUNTS_PER_MOTOR_REV = 1120
+     *          DRIVE_GREAR_REDUCTION = .50
+     *          WHEEL_DIAMETER_INCHES = 4.0
+     *
+     *   then
+     *      CPI = ((1120 * 1) / (4.0 *3.1415))
+     *          = (1120) / (1.273277096928219)
+     *          = 879.62
+     *
+     *   Thus, to move forward 1" takes approximately 879.62 ticks
+     */
 
  @Override
  public void runOpMode() throws InterruptedException {
@@ -97,75 +171,45 @@ public class CSimu extends LinearOpMode {
 
      waitForStart();
 
-
-
-     // Set the Initial; Blinkin Color Schema to Aqua (Represents CS9977 Team Colors
-     //robot2.blinkinLedDriver.setPattern(pattern);
-     //robot2.pattern = RevBlinkinLedDriver.BlinkinPattern.TWINKLES_RAINBOW_PALETTE;
-
-     /* Use this section to write the steps for Autonomous Movements
-      *
-      *  things we should include here are:
-      *      1. Motor Movements
-      *      2. Vision Detection via TensorFlow, VuForia, DodgeCV (depending on what we decide to use)
-      *      3. Sensor input/output  (Color Sensors, Distance Sensors, Limit Switches, etc..)
-      *      4. Navigation Utilities (as needed)
-      */
-
-
-     //  At this point of the testing, the robot should be back against the wall.   Any margin of error, means we need to tune the PID values
+     // Using Advacned PID Tuning via REV COntrol Hub
+     //   Reference URL: https://github.com/FIRST-Tech-Challenge/SkyStone/wiki/Changing-PID-Coefficients
      //
-     // 10/29/19  -   Above PID drive functions worked, and should be good for Merging into the Competition Software Release
+     // Example Command:
+     // robot2.DriveLeftFront.setVelocityPIDFCoefficients(1.26, .126, 0, 12.6);
 
-     // Setup Timer for As mode
-
-
-     // added the LED Signal Codes 12/12/19
-     // Need to Test
-     while (runtime.seconds() > 30) {       // Set LED pattern to GREE; Indicates that were starting/within 30-10 seconds of AS mode
-         pattern = RevBlinkinLedDriver.BlinkinPattern.GREEN;
-         blinkinLedDriver.setPattern(pattern); // Set the LED pattern to GREEN
-
-
-         if (runtime.seconds() < 10) {      // Set LED patterbn to RED;  Indicsates that we are within the last 10 seconds of AS mode.
-             pattern = RevBlinkinLedDriver.BlinkinPattern.RED;
-             blinkinLedDriver.setPattern(pattern);  // SET LED pattern to RED
-         }
-     }
-
-
-     PIDDriveForward(1,90,24);      // Drive Forward at full power, 90 Deg angle, 40" Distance -- TEST ONLY not for Competition
+     // 90 Degrees = Straight line
 
 
 
-     // This section is a placeholder for Vision Detection of the Skystone
-     //  Methods we can choose from include:
-     //     1. Using REV3 Color/Distance Sensor
-     //     2. Using TensorFlor Vision
-     //     3. Using OpenCV Vision
+  /*  GoBilda Motor Encoder Mis-Wiring Testing Statement
+   *
+   *   There is an issue with GoBilda Manufacturing proccess where the Motor Encoder wires were
+   *   incorrectly mis-wired.
+   *
+   *   Symptoms include:
+   *    - motor Encoder tick counts decreasing vs increasing
+   *    - irregular driving patterns during Autonomous Code Execution
+   *    - PID CONTROL Algorithms not functioning properly
+   *
+   *   FTC Forum Post identifying this issue:
+   *    https://ftcforum.firstinspires.org/forum/ftc-technology/75167-warning-about-gobilda-motor-directions
+   *
+   *  To Test:
+   *    1. Set robot up on blocks or Floor
+   *    2. Run the Motors at slow speed (25% motor power)
+   *    3. Instruct robot to run a LONG distance (were using 200" inches)
+   *    4. Telemetry will be displayed on the Driver Station phone
+   *        - Verify all 4 motors are incrementing in counts
+   *        - Any Motors that are "decreasing" in values would indicate a motor that is mis-wired
+   *
+   *    5. Repair or Replace motor as needed
+   *
+   */
+
+    // Command below assumes robot is on blocks, NOT ON THE FIELD!!!!!!!!!!!!!!
 
 
-
-     // This second is a placeholder for Moving the Foundation to the build zone corner
-     //  Place frame work here
-
-
-
-     // This is the last placeholder for returning to mid-field to gain the parking points.
-     // Pace framework here.
-
-
-     /*
-     *    Test the following statement below.
-     *
-     * Purpose:
-     *   This will call the MecanumDrive.java file, were I have all the Mecanum Methods stored.  If this works, then we can eliminate these same methods in the AS Program, cleaning it up.
-     *   It will also provide us a way to make changes just to the MecanumDrive.java file vesus altering 4 or more AS programs, lowering the chances of errors or ommissions.
-     *
-     * End Result:   Our AS programs will be come very small, and if we need to re-write code at a competition, it should be simple and fast.
-
-      */
-     //mecanum.PIDDriveForward(1,90,24);   //   10/29/19   Test this to see if we can reference
+      PIDDriveForward(1 ,90,12); // Drive Forward @ 25% power, 90 degrees, 200"
 
 
 
@@ -217,7 +261,12 @@ public class CSimu extends LinearOpMode {
         // returned as 0 to +180 or 0 to -180 rolling back to -179 or +179 when rotation passes
         // 180 degrees. We detect this transition and track the total cumulative angle of rotation.
 
+        // Note:  If your huv is mounted vertically, remap the IMU axes so that the z-axis points
+        //        upward (normal to the floo) using a command like:
+        // Orientation angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES);
+
         Orientation angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+
 
 
 
@@ -307,8 +356,8 @@ public class CSimu extends LinearOpMode {
         robot2.DriveLeftFront.setTargetPosition(0);
         robot2.DriveLeftRear.setTargetPosition(0);
 
-        telemetry.addLine("Just setTarget Position");
-        telemetry.update();
+        //telemetry.addLine("Just setTarget Position");
+        //telemetry.update();
 
 
 
@@ -318,9 +367,11 @@ public class CSimu extends LinearOpMode {
         robot2.DriveRightRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         robot2.DriveLeftRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        telemetry.addLine("Set RUN_TO_POS");
-        telemetry.update();
-        sleep(500);
+        //telemetry.addLine("Set RUN_TO_POS");
+        //telemetry.update();
+        //sleep(500);
+
+
 
         // Stop Motors and set Motor Power to 0
         robot2.DriveRightFront.setPower(0);
@@ -344,9 +395,24 @@ public class CSimu extends LinearOpMode {
 
             //Set Motor Power  - This engages the Motors and starts the robot movements
             robot2.DriveRightFront.setPower(speed + correction);
-            robot2.DriveLeftFront.setPower(speed + correction);
+            robot2.DriveLeftFront.setPower(speed + correction );
             robot2.DriveRightRear.setPower(speed + correction);
-            robot2.DriveLeftRear.setPower(speed + correction);
+            robot2.DriveLeftRear.setPower(speed + correction );
+
+
+            // This telemetry is being used to test the GOBILD Motor Encorder Mis-Wiring issues
+            //
+            //  All Motors  Encoder Ticks should be increasing, nNOT decreasing
+            //    Any motors that are found to be decreasing has a mis-wired Motor Encoder
+            telemetry.addData("DriveRightFront CPI: ", robot2.DriveRightFront.getCurrentPosition());
+            telemetry.addData("DriveRightRear CPI: ", robot2.DriveRightRear.getCurrentPosition());
+            telemetry.addLine(" ---------------------");
+            telemetry.addData("DriveLeftFront CPI: ", robot2.DriveLeftFront.getCurrentPosition());
+            telemetry.addData("DriveLeftRear CPI: ", robot2.DriveLeftRear.getCurrentPosition());
+            telemetry.update();
+            sleep(500);
+
+
         }    // This brace closes out the while loop
 
         //Reset Encoders
@@ -398,90 +464,10 @@ public class CSimu extends LinearOpMode {
         robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        // Set RUN_TO_POSITION
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        sleep(500);
-
-        // Stop Motors and set Motor Power to 0
-        //PIDstopALL()
-        robot2.DriveRightFront.setPower(0);
-        robot2.DriveLeftFront.setPower(0);
-        robot2.DriveRightRear.setPower(0);
-        robot2.DriveLeftRear.setPower(0);
-
-
-        double InchesMoving = (distance * COUNTS_PER_INCH);
-
-
-        // Set Target
-        robot2.DriveRightFront.setTargetPosition((int) -InchesMoving);
-        robot2.DriveLeftFront.setTargetPosition((int) -InchesMoving);
-        robot2.DriveRightRear.setTargetPosition((int) -InchesMoving);
-        robot2.DriveLeftRear.setTargetPosition((int) -InchesMoving);
-
-
-        while (robot2.DriveRightFront.isBusy() && robot2.DriveRightRear.isBusy()
-                && robot2.DriveLeftFront.isBusy() && robot2.DriveLeftRear.isBusy()) {
-
-
-            //Set Motor Power  - This engages the Motors and starts the robot movements
-            robot2.DriveRightFront.setPower(speed + correction);
-            robot2.DriveLeftFront.setPower(speed + correction);
-            robot2.DriveRightRear.setPower(speed);
-            robot2.DriveLeftRear.setPower(speed);
-        }    // This brace closes out the while loop
-
-        //Reset Encoders
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        //PIDstopALL()
-        robot2.DriveRightFront.setPower(0);
-        robot2.DriveLeftFront.setPower(0);
-        robot2.DriveRightRear.setPower(0);
-        robot2.DriveLeftRear.setPower(0);
-
-    }   // END OF PIDDriveBackward
-
-    public void PIDDrivebackward2(double speed, double angle, int distance) {    // Added: 1/18/19
-
-        // This is an attempt to use PID only, no encoders
-
-
-        /* Things to pass the Method
-         *
-         * 1. speed
-         * 2. Angle
-         * 3. distance
-         *
-         * Example:  PIDDriveForward(.50,90, 24);        // Drive robot forward in a straight line for 4" @ 50% Power
-         */
-
-        // Setup Straight Line Driving
-
-        pidDrive.setSetpoint(0);
-        pidDrive.setOutputRange(0, speed);
-        pidDrive.setInputRange(-angle, angle);
-        pidDrive.enable();
-
-        // Use PID with imu input to drive in a straight line.
-        double correction = pidDrive.performPID(getAngle2());
-
-
-        //Initialize Mecanum Wheel DC Motor Behavior
-        setZeroPowerBrakes();   // Set DC Motor Brake Behavior
-
-
-        //  Reset Encoders:    Alternate way:  DriveRightFrontEncoder.reset();
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightFront.setTargetPosition(0);
+        robot2.DriveRightRear.setTargetPosition(0);
+        robot2.DriveLeftFront.setTargetPosition(0);
+        robot2.DriveLeftRear.setTargetPosition(0);
 
         // Set RUN_TO_POSITION
         robot2.DriveRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -569,6 +555,11 @@ public class CSimu extends LinearOpMode {
         robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+        robot2.DriveRightFront.setTargetPosition(0);
+        robot2.DriveRightRear.setTargetPosition(0);
+        robot2.DriveLeftFront.setTargetPosition(0);
+        robot2.DriveLeftRear.setTargetPosition(0);
+
         // Set RUN_TO_POSITION
         robot2.DriveRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         robot2.DriveLeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -588,10 +579,10 @@ public class CSimu extends LinearOpMode {
 
 
         // Set Target
-        robot2.DriveRightFront.setTargetPosition((int) -InchesMoving);
-        robot2.DriveLeftFront.setTargetPosition((int) InchesMoving);
-        robot2.DriveRightRear.setTargetPosition((int) InchesMoving);
-        robot2.DriveLeftRear.setTargetPosition((int) -InchesMoving);
+        robot2.DriveRightFront.setTargetPosition((int) InchesMoving);
+        robot2.DriveLeftFront.setTargetPosition((int) -InchesMoving);
+        robot2.DriveRightRear.setTargetPosition((int) -InchesMoving);
+        robot2.DriveLeftRear.setTargetPosition((int) InchesMoving);
 
 
         while (robot2.DriveRightFront.isBusy() && robot2.DriveRightRear.isBusy()
@@ -600,7 +591,7 @@ public class CSimu extends LinearOpMode {
 
             //Set Motor Power  - This engages the Motors and starts the robot movements
             robot2.DriveRightFront.setPower(speed);
-            robot2.DriveLeftFront.setPower(speed);
+            robot2.DriveLeftFront.setPower(speed + correction);
             robot2.DriveRightRear.setPower(speed + correction);
             robot2.DriveLeftRear.setPower(speed);
         }    // This brace closes out the while loop
@@ -656,6 +647,11 @@ public class CSimu extends LinearOpMode {
         robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+        robot2.DriveRightFront.setTargetPosition(0);
+        robot2.DriveRightRear.setTargetPosition(0);
+        robot2.DriveLeftFront.setTargetPosition(0);
+        robot2.DriveLeftRear.setTargetPosition(0);
+
         // Set RUN_TO_POSITION
         robot2.DriveRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         robot2.DriveLeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -675,10 +671,10 @@ public class CSimu extends LinearOpMode {
 
 
         // Set Target
-        robot2.DriveRightFront.setTargetPosition((int) InchesMoving);
-        robot2.DriveLeftFront.setTargetPosition((int) -InchesMoving);
-        robot2.DriveRightRear.setTargetPosition((int) -InchesMoving);
-        robot2.DriveLeftRear.setTargetPosition((int) InchesMoving);
+        robot2.DriveRightFront.setTargetPosition((int)- InchesMoving);
+        robot2.DriveLeftFront.setTargetPosition((int) InchesMoving);
+        robot2.DriveRightRear.setTargetPosition((int) InchesMoving);
+        robot2.DriveLeftRear.setTargetPosition((int) -InchesMoving);
 
 
         while (robot2.DriveRightFront.isBusy() && robot2.DriveRightRear.isBusy()
@@ -715,6 +711,11 @@ public class CSimu extends LinearOpMode {
         robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         sleep(500);
+
+        robot2.DriveRightFront.setTargetPosition(0);
+        robot2.DriveRightRear.setTargetPosition(0);
+        robot2.DriveLeftFront.setTargetPosition(0);
+        robot2.DriveLeftRear.setTargetPosition(0);
 
         // Set RUN_TO_POSITION
 
@@ -772,6 +773,11 @@ public class CSimu extends LinearOpMode {
         robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         sleep(500);
+
+        robot2.DriveRightFront.setTargetPosition(0);
+        robot2.DriveRightRear.setTargetPosition(0);
+        robot2.DriveLeftFront.setTargetPosition(0);
+        robot2.DriveLeftRear.setTargetPosition(0);
 
         // Set RUN_TO_POSITION
 

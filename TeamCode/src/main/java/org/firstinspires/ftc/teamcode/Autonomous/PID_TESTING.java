@@ -5,7 +5,9 @@ package org.firstinspires.ftc.teamcode.Autonomous;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+//import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -14,7 +16,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Axis;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.DriveTrain.PIDController;
-import org.firstinspires.ftc.teamcode.HardwareMap.CSimuHardwareMap;
+
+import org.firstinspires.ftc.teamcode.HardwareMap.skyHardwareMap2;
 import com.qualcomm.robotcore.hardware.PIDCoefficients;
 
 /* 10/29/19 - Good Lesson Learned here....
@@ -56,8 +59,8 @@ public class PID_TESTING extends LinearOpMode {
 
     // Decalre hardware
 
+    skyHardwareMap2 robot2 = new skyHardwareMap2();
 
-    CSimuHardwareMap robot2 = new CSimuHardwareMap();
     ElapsedTime runtime = new ElapsedTime();
 
 
@@ -73,8 +76,8 @@ public class PID_TESTING extends LinearOpMode {
 
     //Define Drivetrain Variabeles
 
-    static final double COUNTS_PER_MOTOR_REV = 753.2;   // Andymark 40 Motor Tick Count
-    static final double DRIVE_GEAR_REDUCTION = .5;    // This is > 1.0 if motors are geared up ____  Using OVerdrive gearing with Pico Uno boxes  40 gear to 35 gear over-drive
+    static final double COUNTS_PER_MOTOR_REV = 537.6;                           // GoBilda 5202 YellowJacket 312RPM Motor
+    static final double DRIVE_GEAR_REDUCTION = 1;    // This is > 1.0 if motors are geared up ____  Using OVerdrive gearing with Pico Uno boxes  40 gear to 35 gear over-drive
     static final double WHEEL_DIAMETER_INCHES = 4.0;   // For figuring out circumfrance
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
 
@@ -95,34 +98,21 @@ public class PID_TESTING extends LinearOpMode {
 
      waitForStart();
 
-     // Using Advacned PID Tuning via REV COntrol Hub
-     //   Reference URL: https://github.com/FIRST-Tech-Challenge/SkyStone/wiki/Changing-PID-Coefficients
-     //
-     // Example Command:
-     // robot2.DriveLeftFront.setVelocityPIDFCoefficients(1.26, .126, 0, 12.6);
-
-     // 90 Degrees = Straight line
-
-
-     // Drive Forward @ 50% Power, 90 degrees, Distance of 24"
 
 
 
-      PIDDriveForward(.75,90,48); // Drive Forward @ 75% power, 90 degrees, 24"
-    // RotateRight(.5,2);
-     //PIDDriveForward(1,90,24); // Drive Forward at 100% power, 90 degress, 24"
+     PIDDrivebackward(.8  , 90,24);
+     sleep(1000);
+     RotateLeft(.50,21 );
+     resetAngle();
+     //setupIMU();
+     sleep(500);
 
-     //PIDDrivebackward(.5,90,12); //Drive Backward @ 50% power, 90 degrees, 12"
-     //PIDDrivebackward(.75, 90, 24); //Drive backward @ 75% power, 90 degrees, 24"
-     //PIDDrivebackward(1, 90, 24); //Drive backward @100% power, 90 degrees, 24"
+     PIDDrivebackward(.50,90,26);
 
-     //PIDDriveStrafeRight(.50, 90, 12); //strafe right @ 50% power, 90 degrees, 12"
-     //PIDDriveStrafeRight(.75, 90, 24); //strafe right @ 75% power, 90 degrees, 24"
-     //PIDDriveStrafeRight(1, 90, 24); //strafe right @ 100% power, 90 degrees, 24"
 
-     //PIDDriveStrafeLeft(.50, 90, 12); //strafe left @ 50% power, 90 degrees, 12"
-     //PIDDriveStrafeLeft(.75, 90, 24); //strafe left @ 75% power, 90 degrees, 24"
-     //PIDDriveStrafeLeft(1,90, 24); //strafe left @ 100% power, 90 degrees, 24"
+
+
 
 
 
@@ -246,10 +236,11 @@ public class PID_TESTING extends LinearOpMode {
 
 
         //  Reset Encoders:    Alternate way:  DriveRightFrontEncoder.reset();
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
 
 
@@ -270,20 +261,15 @@ public class PID_TESTING extends LinearOpMode {
         robot2.DriveLeftFront.setTargetPosition(0);
         robot2.DriveLeftRear.setTargetPosition(0);
 
-        telemetry.addLine("Just setTarget Position");
-        telemetry.update();
-
 
 
         // Set RUN_TO_POSITION
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        telemetry.addLine("Set RUN_TO_POS");
-        telemetry.update();
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
         sleep(500);
+
 
         // Stop Motors and set Motor Power to 0
         robot2.DriveRightFront.setPower(0);
@@ -313,10 +299,10 @@ public class PID_TESTING extends LinearOpMode {
         }    // This brace closes out the while loop
 
         //Reset Encoders
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
         //PIDstopALL()
         robot2.DriveRightFront.setPower(0);
@@ -356,10 +342,10 @@ public class PID_TESTING extends LinearOpMode {
 
 
         //  Reset Encoders:    Alternate way:  DriveRightFrontEncoder.reset();
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
         robot2.DriveRightFront.setTargetPosition(0);
         robot2.DriveRightRear.setTargetPosition(0);
@@ -367,10 +353,10 @@ public class PID_TESTING extends LinearOpMode {
         robot2.DriveLeftRear.setTargetPosition(0);
 
         // Set RUN_TO_POSITION
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
         sleep(500);
 
         // Stop Motors and set Motor Power to 0
@@ -403,10 +389,10 @@ public class PID_TESTING extends LinearOpMode {
         }    // This brace closes out the while loop
 
         //Reset Encoders
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
         //PIDstopALL()
         robot2.DriveRightFront.setPower(0);
@@ -447,10 +433,10 @@ public class PID_TESTING extends LinearOpMode {
 
 
         //  Reset Encoders:    Alternate way:  DriveRightFrontEncoder.reset();
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
         robot2.DriveRightFront.setTargetPosition(0);
         robot2.DriveRightRear.setTargetPosition(0);
@@ -458,10 +444,10 @@ public class PID_TESTING extends LinearOpMode {
         robot2.DriveLeftRear.setTargetPosition(0);
 
         // Set RUN_TO_POSITION
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
         sleep(500);
 
         // Stop Motors and set Motor Power to 0
@@ -476,10 +462,10 @@ public class PID_TESTING extends LinearOpMode {
 
 
         // Set Target
-        robot2.DriveRightFront.setTargetPosition((int) InchesMoving);
-        robot2.DriveLeftFront.setTargetPosition((int) -InchesMoving);
-        robot2.DriveRightRear.setTargetPosition((int) -InchesMoving);
-        robot2.DriveLeftRear.setTargetPosition((int) InchesMoving);
+        robot2.DriveRightFront.setTargetPosition((int) -InchesMoving);
+        robot2.DriveLeftFront.setTargetPosition((int) InchesMoving);
+        robot2.DriveRightRear.setTargetPosition((int) InchesMoving);
+        robot2.DriveLeftRear.setTargetPosition((int) -InchesMoving);
 
 
         while (robot2.DriveRightFront.isBusy() && robot2.DriveRightRear.isBusy()
@@ -494,10 +480,10 @@ public class PID_TESTING extends LinearOpMode {
         }    // This brace closes out the while loop
 
         //Reset Encoders
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
         // Stop Motors and set Motor Power to 0
         //PIDstopALL();
@@ -539,10 +525,10 @@ public class PID_TESTING extends LinearOpMode {
 
 
         //  Reset Encoders:    Alternate way:  DriveRightFrontEncoder.reset();
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
         robot2.DriveRightFront.setTargetPosition(0);
         robot2.DriveRightRear.setTargetPosition(0);
@@ -550,10 +536,10 @@ public class PID_TESTING extends LinearOpMode {
         robot2.DriveLeftRear.setTargetPosition(0);
 
         // Set RUN_TO_POSITION
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
         sleep(500);
 
         // Stop Motors and set Motor Power to 0
@@ -568,10 +554,10 @@ public class PID_TESTING extends LinearOpMode {
 
 
         // Set Target
-        robot2.DriveRightFront.setTargetPosition((int)- InchesMoving);
-        robot2.DriveLeftFront.setTargetPosition((int) InchesMoving);
-        robot2.DriveRightRear.setTargetPosition((int) InchesMoving);
-        robot2.DriveLeftRear.setTargetPosition((int) -InchesMoving);
+        robot2.DriveRightFront.setTargetPosition((int) InchesMoving);
+        robot2.DriveLeftFront.setTargetPosition((int) -InchesMoving);
+        robot2.DriveRightRear.setTargetPosition((int) -InchesMoving);
+        robot2.DriveLeftRear.setTargetPosition((int) InchesMoving);
 
 
         while (robot2.DriveRightFront.isBusy() && robot2.DriveRightRear.isBusy()
@@ -586,10 +572,10 @@ public class PID_TESTING extends LinearOpMode {
         }    // This brace closes out the while loop
 
         //Reset Encoders
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
         // Stop Motors and set Motor Power to 0
         //PIDstopALL();
@@ -602,12 +588,16 @@ public class PID_TESTING extends LinearOpMode {
 
 
     public void RotateLeft(double speed, int distance) {
+
+        //Initialize Mecanum Wheel DC Motor Behavior
+        setZeroPowerBrakes();   // Set DC Motor Brake Behavior
+
         // Reset Encoders
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        sleep(500);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+
 
         robot2.DriveRightFront.setTargetPosition(0);
         robot2.DriveRightRear.setTargetPosition(0);
@@ -616,10 +606,11 @@ public class PID_TESTING extends LinearOpMode {
 
         // Set RUN_TO_POSITION
 
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        sleep(500);
 
         // Set Motor Power to 0
         robot2.DriveRightFront.setPower(0);
@@ -651,24 +642,42 @@ public class PID_TESTING extends LinearOpMode {
         }  // THis brace close out the while Loop
 
         //Reset Encoders
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
         robot2.DriveRightFront.setPower(0);
         robot2.DriveRightRear.setPower(0);
         robot2.DriveLeftFront.setPower(0);
         robot2.DriveLeftRear.setPower(0);
 
+        robot2.DriveRightFront.setTargetPosition(0);
+        robot2.DriveRightRear.setTargetPosition(0);
+        robot2.DriveLeftFront.setTargetPosition(0);
+        robot2.DriveLeftRear.setTargetPosition(0);
+
+        // Set RUN_TO_POSITION
+
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        sleep(500);
+
+
     } // This brace closes out RotateLeft
 
     public void RotateRight(double speed, int distance) {
+
+        //Initialize Mecanum Wheel DC Motor Behavior
+        setZeroPowerBrakes();   // Set DC Motor Brake Behavior
+
         // Reset Encoders
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         sleep(500);
 
         robot2.DriveRightFront.setTargetPosition(0);
@@ -678,10 +687,11 @@ public class PID_TESTING extends LinearOpMode {
 
         // Set RUN_TO_POSITION
 
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        sleep(500);
 
         // Set Motor Power to 0
         robot2.DriveRightFront.setPower(0);
@@ -713,10 +723,10 @@ public class PID_TESTING extends LinearOpMode {
         }  // THis brace close out the while Loop
 
         //Reset Encoders
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
 
         robot2.DriveRightFront.setPower(0);
@@ -725,15 +735,259 @@ public class PID_TESTING extends LinearOpMode {
         robot2.DriveLeftRear.setPower(0);
     }  // This brace closes out RotateRight Method
 
+    public void PIDDrotateRight(double speed, double angle, int distance) {    // Added: 1/18/19
+
+        // This is an attempt to use PID only, no encoders
 
 
+        /* Things to pass the Method
+         *
+         * 1. speed
+         * 2. Angle
+         * 3. distance
+         *
+         * Example:  PIDDriveForward(.50,90, 24);        // Drive robot forward in a straight line for 4" @ 50% Power
+         */
+
+        // Setup Straight Line Driving
+
+
+        pidDrive.setSetpoint(0);
+        pidDrive.setOutputRange(0, speed);
+        pidDrive.setInputRange(-angle, angle);
+        pidDrive.enable();
+
+
+        // Use PID with imu input to drive in a straight line.
+        double correction = pidDrive.performPID(getAngle2());
+
+
+        //Initialize Mecanum Wheel DC Motor Behavior
+        setZeroPowerBrakes();   // Set DC Motor Brake Behavior
+
+
+        //  Reset Encoders:    Alternate way:  DriveRightFrontEncoder.reset();
+
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+
+
+
+        /* Setup Default Robot Position...  setTargetPosition= null
+         *  This section was added after our initial attempts to re-use these
+         *  PID controls failed.   Error message on the DS phone indicated
+         *  we needed to setTargetPostion before running to position
+         *
+         *  I am adding this is a test, to see if we initialize the defauly
+         *  position to 0 (robot against the wall), knowing that we will re-calculate the positon
+         *  later in this method.
+         *
+         *  For competition, we will need to be more accurate, most likely.
+         */
+
+        robot2.DriveRightFront.setTargetPosition(0);
+        robot2.DriveRightRear.setTargetPosition(0);
+        robot2.DriveLeftFront.setTargetPosition(0);
+        robot2.DriveLeftRear.setTargetPosition(0);
+
+
+
+        // Set RUN_TO_POSITION
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        sleep(500);
+
+
+        // Stop Motors and set Motor Power to 0
+        robot2.DriveRightFront.setPower(0);
+        robot2.DriveLeftFront.setPower(0);
+        robot2.DriveRightRear.setPower(0);
+        robot2.DriveLeftRear.setPower(0);
+
+        double InchesMoving = (distance * COUNTS_PER_INCH);
+
+
+        // Set Target
+        robot2.DriveRightFront.setTargetPosition((int) -InchesMoving);
+        robot2.DriveLeftFront.setTargetPosition((int) InchesMoving);
+        robot2.DriveRightRear.setTargetPosition((int) -InchesMoving);
+        robot2.DriveLeftRear.setTargetPosition((int) InchesMoving);
+
+
+        while (robot2.DriveRightFront.isBusy() && robot2.DriveRightRear.isBusy()
+                && robot2.DriveLeftFront.isBusy() && robot2.DriveLeftRear.isBusy()) {
+
+
+            //Set Motor Power  - This engages the Motors and starts the robot movements
+            robot2.DriveRightFront.setPower(speed + correction);
+            robot2.DriveLeftFront.setPower(speed + correction );
+            robot2.DriveRightRear.setPower(speed + correction);
+            robot2.DriveLeftRear.setPower(speed + correction );
+        }    // This brace closes out the while loop
+
+        //Reset Encoders
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+
+        //PIDstopALL()
+        robot2.DriveRightFront.setPower(0);
+        robot2.DriveLeftFront.setPower(0);
+        robot2.DriveRightRear.setPower(0);
+        robot2.DriveLeftRear.setPower(0);
+
+
+    }   // END OF PIDDrotateRight
+
+    public void PIDDrotateLeft(double speed, double angle, int distance) {    // Added: 1/18/19
+
+        // This is an attempt to use PID only, no encoders
+
+
+        /* Things to pass the Method
+         *
+         * 1. speed
+         * 2. Angle
+         * 3. distance
+         *
+         * Example:  PIDDriveForward(.50,90, 24);        // Drive robot forward in a straight line for 4" @ 50% Power
+         */
+
+        // Setup Straight Line Driving
+
+
+        pidDrive.setSetpoint(0);
+        pidDrive.setOutputRange(0, speed);
+        pidDrive.setInputRange(-angle, angle);
+        pidDrive.enable();
+
+
+        // Use PID with imu input to drive in a straight line.
+        double correction = pidDrive.performPID(getAngle2());
+
+
+        //Initialize Mecanum Wheel DC Motor Behavior
+        setZeroPowerBrakes();   // Set DC Motor Brake Behavior
+
+
+        //  Reset Encoders:    Alternate way:  DriveRightFrontEncoder.reset();
+
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+
+
+
+        /* Setup Default Robot Position...  setTargetPosition= null
+         *  This section was added after our initial attempts to re-use these
+         *  PID controls failed.   Error message on the DS phone indicated
+         *  we needed to setTargetPostion before running to position
+         *
+         *  I am adding this is a test, to see if we initialize the defauly
+         *  position to 0 (robot against the wall), knowing that we will re-calculate the positon
+         *  later in this method.
+         *
+         *  For competition, we will need to be more accurate, most likely.
+         */
+
+        robot2.DriveRightFront.setTargetPosition(0);
+        robot2.DriveRightRear.setTargetPosition(0);
+        robot2.DriveLeftFront.setTargetPosition(0);
+        robot2.DriveLeftRear.setTargetPosition(0);
+
+
+
+        // Set RUN_TO_POSITION
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        sleep(500);
+
+
+        // Stop Motors and set Motor Power to 0
+        robot2.DriveRightFront.setPower(0);
+        robot2.DriveLeftFront.setPower(0);
+        robot2.DriveRightRear.setPower(0);
+        robot2.DriveLeftRear.setPower(0);
+
+        double InchesMoving = (distance * COUNTS_PER_INCH);
+
+
+        // Set Target
+        robot2.DriveRightFront.setTargetPosition((int) InchesMoving);
+        robot2.DriveLeftFront.setTargetPosition((int) -InchesMoving);
+        robot2.DriveRightRear.setTargetPosition((int) InchesMoving);
+        robot2.DriveLeftRear.setTargetPosition((int) -InchesMoving);
+
+
+        while (robot2.DriveRightFront.isBusy() && robot2.DriveRightRear.isBusy()
+                && robot2.DriveLeftFront.isBusy() && robot2.DriveLeftRear.isBusy()) {
+
+
+            //Set Motor Power  - This engages the Motors and starts the robot movements
+            robot2.DriveRightFront.setPower(speed + correction);
+            robot2.DriveLeftFront.setPower(speed + correction );
+            robot2.DriveRightRear.setPower(speed + correction);
+            robot2.DriveLeftRear.setPower(speed + correction );
+        }    // This brace closes out the while loop
+
+        //Reset Encoders
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+
+        PIDstopALL();
+
+        robot2.DriveRightFront.setPower(0);
+        robot2.DriveLeftFront.setPower(0);
+        robot2.DriveRightRear.setPower(0);
+        robot2.DriveLeftRear.setPower(0);
+
+    }   // END OF PIDDrotateLeft
+
+    private void PIDstopALL () {
+        // Reset Encoders
+        telemetry.addLine("Resetting Encoders");
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+
+        sleep(1000);
+
+        telemetry.addLine("NOW setting RUN_WITHOUT_ENCODER");
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        sleep(500);
+
+        telemetry.addLine("Now setting Power to 0");
+        robot2.DriveRightFront.setPower(0);
+        robot2.DriveLeftFront.setPower(0);
+        robot2.DriveRightRear.setPower(0);
+        robot2.DriveLeftRear.setPower(0);
+        sleep(500);
+
+        telemetry.addLine("Done with PIDstopALL");
+        telemetry.update();
+
+    }
 
     private void setZeroPowerBrakes() {
         //Initialize Mecanum Wheel DC Motor Behavior
-        robot2.DriveRightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        robot2.DriveRightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        robot2.DriveLeftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        robot2.DriveLeftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        robot2.DriveRightFront.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        robot2.DriveRightRear.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        robot2.DriveLeftFront.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        robot2.DriveLeftRear.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
     }
 
 }

@@ -1,77 +1,43 @@
 package org.firstinspires.ftc.teamcode.Autonomous;
 
-import android.app.Activity;
-import android.graphics.Color;
-import android.view.View;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.teamcode.DbgLog;
 import org.firstinspires.ftc.teamcode.DriveTrain.PIDController;
-import org.firstinspires.ftc.teamcode.HardwareMap.skyHardwareMap;
-
-import com.qualcomm.robotcore.hardware.TouchSensor;
-import com.qualcomm.robotcore.hardware.Servo;
-import org.firstinspires.ftc.teamcode.UniversalConstants;
-
-import java.util.Locale;
-
-/* 10/29/19 - Good Lesson Learned here....
- *
- *   "Even the seasoned Programmer/Engineer can sometimes forget the basics....."
- *
- *  Problem:  When we executed this code, it threw an error indicating that we needed to
- *            setTargetPosition() before engaging the setMode(DcMotor.RunMode.RUN_TO_POSITION)
- *
- *  Troubleshooting:
- *     We attempted many things, including:
- *           1. Complete reconfigure of the RC Configuration file
- *           2. manually adding the setTargetPosition(0) within the method
- *           3. Manipulate a known working PIDDrieForward() method used in the 2018 State Comps
- *
- *  Resolution:
- *       Caleb to the rescue!   He discovered the following code segment was wrong, corrected it and
- *       all the errors went away, robot exeuted the commands without issue and worked perfectly.
- *
- *  Wrong Command:
- *       @Autonomous(name="Blue Build, group=AutonomousData.OFFICIAL_GROUP)
- *
- *  Corrected Command:
- *       @Autonomous(name="Blue Build", group = "CS9977-test")
- *
- *  Summary:
- *       The group= " " statement should be named the same as the Robot Controller Config Name on the phone.
- *
- *        The AutonomousData.OFFICIAL_GROUP was ported from the 2018 season, and was not properly functioning.   We will delete it
- *        and or correct that file contents to match the 2019-20 SkyStone Season parameters.
- *
- *
- */
-
-
-@Disabled       //UNCOMMET OUT to restore to Phone
+import org.firstinspires.ftc.teamcode.HardwareMap.Robot;
+import org.firstinspires.ftc.teamcode.HardwareMap.RobotWebcam;
+import org.firstinspires.ftc.teamcode.HardwareMap.skyHardwareMap2;
 
 
 
-@Autonomous(name="Blue Quarry_FOUNDATION", group = "calebs_robot")
 
-public class BlueQuarry_FOUNDATION extends LinearOpMode {
+@Autonomous(name="AutoVisionWeb", group="csweb")
 
+public class VisionAutoWeb extends RobotWebcam {
 
-    // Decalre hardware
+    VuforiaStuff.skystonePos pos;
+    int stoneDiff, stoneONE, stoneTWO;
+    skyHardwareMap2 robot2 = new skyHardwareMap2();     //  Setup file for all DC Motors, IMU, etc...  ** Using this HwMap only for Test robot.  Competition robot will use skyHardwareMap();
 
-    skyHardwareMap robot2 = new skyHardwareMap();
     ElapsedTime runtime = new ElapsedTime();
+
+    /**
+     * This is the webcam we are to use. As with other hardware devices such as motors and
+     * servos, this device is identified using the robot configuration tool in the FTC application.
+     */
+
 
 
     // Created Rev Robotics BlinkIN instances
@@ -80,19 +46,8 @@ public class BlueQuarry_FOUNDATION extends LinearOpMode {
     RevBlinkinLedDriver.BlinkinPattern pattern;
 
 
-    // REV Robotics Color Sensor + Distance Sensor Rev v3 Definitions
-    boolean capstoneDetected = false;
-
-    // Defaint TouchSensor
-    private static TouchSensor Touch;
-
-    // Setup ArmServo1 and ArmServo2
-    private static Servo ArmServo1, ArmServo2, LHook, RHook;
-
 
     //Create IMU Instance
-    int A;
-    int capCount = 0;
     PIDController pidDrive, pidRotate;
     BNO055IMU imu;
     Orientation lastAngles = new Orientation();
@@ -100,175 +55,392 @@ public class BlueQuarry_FOUNDATION extends LinearOpMode {
 
     //Define Drivetrain Variabeles
 
-    static final double COUNTS_PER_MOTOR_REV = 743.2;                           // GoBilda 5202 YellowJacket 312RPM Motor
-    static final double DRIVE_GEAR_REDUCTION = .69;    // This is > 1.0 if motors are geared up ____  Using OVerdrive gearing with Pico Uno boxes  40 gear to 35 gear over-drive
-    static final double WHEEL_DIAMETER_INCHES = 4.0;   // For figuring out circumfrance
+    static final double COUNTS_PER_MOTOR_REV = 537.6;                           // GoBilda 5202 YellowJacket 312RPM Motor
+    static final double DRIVE_GEAR_REDUCTION = 1;                             // This is > 1.0 if motors are geared up ____  Using OVerdrive gearing with Pico Uno boxes  40 gear to 35 gear over-drive
+    static final double WHEEL_DIAMETER_INCHES = 4.0;                            // For figuring out circumfrance
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
+
+
 
     @Override
     public void runOpMode() throws InterruptedException {
-
         robot2.init(hardwareMap);
         setupIMU();
+        sleep(500);
+        robotInit();         // Used to Setup Vuforia Parameters
 
-        // Define Touch Sensor Hardware Mapping
-        Touch = hardwareMap.touchSensor.get("touch");
 
-        // Define ArmServo1 and 2 Hardware Mappings
-        ArmServo1 = hardwareMap.servo.get("ArmServo1");
-        ArmServo2 = hardwareMap.servo.get("ArmServo2");
-        LHook = hardwareMap.servo.get("LHook");
-        RHook = hardwareMap.servo.get("RHook");
 
-        // Configuration setup for Capstone Detection using REV Color/Distance Sensor v3
 
-        // wait for the start button to be pressed.
+        pos = vuforiaStuff.vuforiascan(true, false);
+        switch (pos) {
+            case LEFT:
+                telemetry.addLine("Skystone position is LEFT");
+                telemetry.update();
+                //sleep(5000);
+                stoneDiff = 0;
+                stoneONE = 1;           // First Skystone is in Position 1
+                stoneTWO = 4;           // Second Skystone is in Position 4 (2nd Left Position)
 
-        robot2.GreenArmRight.setPosition(.99);
+                // Blinked in:  Change color Flashing GREEN to indicate we found the stone
+                break;
+            case CENTER:
+                telemetry.addLine("Skystone position is CENTER");
+                telemetry.update();
+                //sleep(5000);
+                stoneDiff = 16;
+                stoneONE = 2;           // First Skystone is in Position 2
+                stoneTWO = 5;           // Second Skytone is in Position 5 (2nd Center Position)
+                // Blinked in:  Change color Flashing GREEN to indicate we found the stone
+                break;
+            case RIGHT:
+                telemetry.addLine("Skystone Position is RIGHT");
+                telemetry.update();
+                sleep(500);
+                stoneDiff = 20;
+                stoneONE = 3;           // First Skystone is in Position 3
+                stoneTWO = 6;           // Second Skystone is in Postion 6 (2nd Right Positon)
+                // Blinked in:  Change color Flashing GREEN to indicate we found the stone
+                break;
+        }
 
-        // This chunk of code gets around the Motorola E4 Disconnect bug.  Should be fixed in SDK 5.3, but adding it as a "backup - JUST IN CASE!!!"
-        //
-        while (!opModeIsActive() && !isStopRequested()) {
-            telemetry.addData("status", "waiting for start command...");
+
+
+
+
+        /*if (pos == VuforiaStuff.skystonePos.LEFT) {
+            telemetry.addLine("Were in the IF poss == VuforiaStuff.skystonePos.LEFT section");
             telemetry.update();
-        }
+        } else {
+            telemetry.addLine("Were in the 'else' portion of the IF poss == VuforiaStuff.skystonePos.LEFT section");
+            telemetry.update();
+        } */
 
 
-        waitForStart();
+        // SET INITIAL BlinkIn Color to Chasing Rainbow.
 
 
-        // Set the Initial; Blinkin Color Schema to Aqua (Represents CS9977 Team Colors
-        //robot2.blinkinLedDriver.setPattern(pattern);
-        //robot2.pattern = RevBlinkinLedDriver.BlinkinPattern.TWINKLES_RAINBOW_PALETTE;
-
-        /* Use this section to write the steps for Autonomous Movements
-         *
-         *  things we should include here are:
-         *      1. Motor Movements
-         *      2. Vision Detection via TensorFlow, VuForia, DodgeCV (depending on what we decide to use)
-         *      3. Sensor input/output  (Color Sensors, Distance Sensors, Limit Switches, etc..)
-         *      4. Navigation Utilities (as needed)
-         */
+        // Setup Drive Commands to get to 1 out of 6 stone Positions
 
 
-        //  At this point of the testing, the robot should be back against the wall.   Any margin of error, means we need to tune the PID values
-        //
-        // 10/29/19  -   Above PID drive functions worked, and should be good for Merging into the Competition Software Release
+        if(stoneONE == 1) {
+            telemetry.addLine("Driving to Skystone Position 1");
+            DbgLog.msg("--------------");
+            DbgLog.msg("   Driving to Skystone Position 1");
+            DbgLog.msg("--------------");
+            //PIDDrivebackward(.80 ,90,27);
+            skystonePos1();             // Call Method to drive to position 1
+            //grabStone();                // Call Method to Grab stone
+            //deliverStone1();            // Call method to Drive to Foundataion, move it, deliver stone, and drive to bridge and park
+        } else if (stoneONE == 2) {
+            telemetry.addLine(" Driving to Skystone Position 2");
+            DbgLog.msg("--------------");
+            DbgLog.msg("   Driving to Skystone Position 2");
+            DbgLog.msg("--------------");
+            skystonePos2();             // Call Method to drive to position 1
+            grabStone();                // Call Method to Grab Stone
+            deliverStone2();            // Call Method to Drive to Foundation, move it, deliver stone, and drive to bridge and park
+        } else {
+            telemetry.addLine("Driving to Skystone Position 3");
+            DbgLog.msg("--------------");
+            DbgLog.msg("   Driving to Skystone Position 3");
+            DbgLog.msg("--------------");
+            skystonePos3();             // Call Method to drive to position 3
+            grabStone();                // Call Method to Grab Stone
+            deliverStone3();            // Call Method to Drive to Foundation, move it, deliver stone, and drive to bridge and park
+         }
 
-        // Setup Timer for As mode
+
+        //PIDDrivebackward(.80,90,27);
 
 
-        // added the LED Signal Codes 12/12/19
-        // Need to Test
-        while (runtime.seconds() > 30) {       // Set LED pattern to GREE; Indicates that were starting/within 30-10 seconds of AS mode
-            pattern = RevBlinkinLedDriver.BlinkinPattern.GREEN;
-            blinkinLedDriver.setPattern(pattern); // Set the LED pattern to GREEN
+    }     //  END OF MAIN PROGRAM
 
 
-            if (runtime.seconds() < 10) {      // Set LED patterbn to RED;  Indicsates that we are within the last 10 seconds of AS mode.
-                pattern = RevBlinkinLedDriver.BlinkinPattern.RED;
-                blinkinLedDriver.setPattern(pattern);  // SET LED pattern to RED
-            }
-        }
-
-        // setup PID Drive Commands to get to Foundation
-
-        while ((opModeIsActive() && (Touch.isPressed() != false))) {
-            PIDDrivebackward(.5, 90, 48);
-        }  // We should now be infront of foundation
-
-        if (Touch.isPressed()){         // We should be at the foundation, and touch sensor is pressed
-            LHook.setPosition(.1);      // Lower the Left Hook, and clamp on foundation
-            RHook.setPosition(.8);      // Lower the Right Hook and clam on foundation
-        }
-        stop();   // For testing only.  This will ensure we are latched onto foundation before moving to help avoid breakage of servos
+// Main Autonomous Methods Section
 
 
 
-        /*   Foundation Move: Test Case 2
-         *
-         *  Assumption:  We have already driven to the foundations and latched onto it.
-         *
-         *  1) Move foundation to the Right 3".  This is so we can clear the wall before rotating it
-         *  2) Rotate the entire foundations 24" (hopefully yields a 90 Degree turn)
-         *  3) Drive it backwards to the field wall
-         *  4) Strafe to the right 4", so that foundation breaks the tape plane
-         *  4) Drive to Parking Zone
-         *
-         */
-    // Postion Foundation
-       PIDDriveStrafeRight(.5, 90, 3); // Move foundataion to the Right
-       RotateRight(.5, 24);   // Rotate Foundation 90 Degrees (24" is a guess, need to test for accuracy)
-       PIDDrivebackward(.5, 90, 4);  // Push Foundataion back to the wall   (4" is a guess, need to test for accuracy)
-       PIDDriveStrafeRight(.5, 90, 4); // Push foundation over the tae break plan
-
-     // Release Hooks
-        LHook.setPosition(.5);   // Move Arm hooks up nad out of the way
-        RHook.setPosition(.4);
-
-     // Drive to Parking Zone
-       PIDDriveForward(1, 90, 50);     // Drive robot forward 50" to land in parking zone
+ /*
+ *  Skystone Position Definitions
+ *
+ *
+ *																								      |
+ *	   																							      |
+ *       																							  |
+ *      [ bridge ]    [Position1]  [Position2] [Position 3]  [Position 4]  [Position 5] [Position 6]  |
+ *  																							 	  |   Perimeter Wall
+ *  																							 	  |
+ *  																							   /  |
+ *  																					  	      /	  |
+ *  																					         /	  |
+ *  																					        /	  |
+ *  			--------------------------------------------------------------------------------------|
+ *
+ *
+ * Autonomous Sequence of Events:
+ *
+ *
+             Autonomous Sequence:
 
 
+             1. Raise Linear Lift (if needed) so web camera can function.  Make sure to do this only after waitForStart(), to avoid a penalty
+
+                UNLESS....  We can position the webcamera to see the stones ahead of time (before match officially begins), and make the
+                            determination which positions the stones are really in..  This would eliminate the need to raise the lift.
+
+
+                 raiseLift();   // Call this method to slightly raise the lift
+
+
+
+             2. Use webcamera to read Skystone Position and return a value of:  LEFT, CENTER, RIGHT
+
+
+             3. Now, using a switch Statement, we will direct the AS program to perform several Functions:
+
+                   - Also set two variables:  StoneONE and StoneTWO, to keep Track of where the second stone is located
+
+                   SkyStone  		StoneONE 	StoneTWO
+                   Position 		Position 	Position
+                   --------------------------------------
+                      LEFT				1			4
+                      CENTER			2			5
+                      RIGHT				3			6
+
+
+                   - Print Telemetry to the Driver Station telling them which stone they are driving to
+                   - Change the BlinkIn LED color to indicate to the driver the same information (Visual Feedback)
+                   - Call one of 6 Drive Methods, which are pre-programmed paths to get to the SkyStone Positions (1-6)
+                        - Within these drive methods, we will call other methods for:
+                            - Driving to Foundation
+                            - Placing stone
+                            - Moving Foundation
+                            - Driving to Bridge
+                            - Parking
+
+
+             4.	End of Delivering 1 or 2 stones we should be parked at the bridge.
 
 
 
 
+             SkyStone Position Methods:
+
+              - These methods will containt the PID drive parameters to move from the field wall (starting Position) to the skystone.
+              - Robot will start in the Quarry side, and our alliance partner in the build zone
+              - This is becuase we want the web camera to calculate the Skystone Position head on.
+
+             skystonePos1()
+             skystonePos2()
+             skystonePos3()
+             skystonePos4()
+             skystonePos5()
+             skystonePos6()
 
 
 
-      /*   Foundation Move: Test Case 2 - is an attempt to reduce the number of movements
-       *
-       *   Assumption:  We have already driven to the foundation and latched onto it.
-       *   1) Drive Forward command will move the foundation towards the driver station 2"
-       *   2) Rotate the entire foundation 24" (hopefully around 90 Degrees
-       *   3) Then drive it to the Field Wall, hopefully it will break the tape place
-       *   4) Release Hooks
-       *   5) Drive to Parking Zone
-       *
-     // Postion Foundation
-       PIDDriveForward(.5, 90, 2);  // move founddation towards wall
-       RotateRight(.5, 24);         // Rotate foundation
-       PIDDrivebackward(.5, 90, 24); //Push foundation to wall
 
-     // Release Hooks
-       LHook.setPosition(.5);   // Move Arm hooks up nad out of the way
-       RHook.setPosition(.4);
+            Grabbing the stone Method:
 
-     // Drive to Parking Zone
-       PIDDriveForward(1, 90, 50);   // Drive robot forward 50" to land in parking zone
+                - This method will be used to grab the Skystone and raise the lift slightly off the ground for safe transport
 
-      */
 
+            grabStone()
+
+
+
+            Delivering Stone Methods:
+
+                - These methods will move the robot from the Quarry side, under the bridge, and to the foundation side
+                - There are six of these methods, since drive lengths from each of the SkyStone positions will be different, and we need to account for that.
+                - We will next grab the foundation here as well. We will consider using a Limit Switch to detect the Foundation
+                - Next, we will place the SkyStone on foundation (we dont care if it stacks or not, just places)
+                - Lastly, we will release the foundation and drive to the bridge
+                - End of AS mode
+
+            deliverStone1()
+            deliverStone2()
+            deliverStone3()
+            deliverStone4()
+            deliverStone5()
+            deliverStone6()
+ *
+ *
+ */
+
+    public void skystonePos1() {
+        // This method will drive the robot to Skystone Position 1 (Closest to the bridge)
+        // Blinked in:  Change color SOLID BLUE to indicate we successfully Drove to the stone
+        PIDDrivebackward(.50,90,29);  // Gets Robot To Stone. -- WORKS
+        grabStone();                                        // Grab Stone -- WORKS
+        sleep(400);
+        PIDDriveForward(.80 ,90, 8); // Drive Forward towards wall -- WORKS
+       // sleep(500);
+        RotateLeft(.8,20);
+        resetAngle();
+       // sleep(500);
+        PIDDrivebackward(.5,90,70);
+        RotateRight(.8,21);
+        resetAngle();
+        liftStone();
+        PIDDrivebackward(.5,90,14);
+        dropStone();
+        PIDDriveForward(.5,90,14);
+        lowerStone();
+        RotateRight(.8,20);
+        resetAngle();
+        PIDDrivebackward(.8,90,35);
+
+
+
+        /*  WORKAROUND....
+        RotateRight(.80,21);
+
+        PIDDriveForward(.80,90,40);
+        PIDDrivebackward(1,90,15);
+
+        */
+    }
+
+    public void skystonePos2() {
+        // This method will drive the robot to Skyston Positon 2
+        // Blinked in:  Change color SOLID BLUE to indicate we successfully Drove to the stone
+        PIDDriveStrafeRight(.5,90,5);
+        PIDDrivebackward(.50,90,29);  // Gets Robot To Stone. -- WORKS
+        grabStone();                                        // Grab Stone -- WORKS
+        sleep(400);
+        PIDDriveForward(.80 ,90, 5); // Drive Forward towards wall -- WORKS
+
+        // sleep(500);
+        RotateLeft(.6,24);
+        resetAngle();
+        // sleep(500);
+        PIDDrivebackward(.5,90,75);
+        RotateRight(.8,21);
+        resetAngle();
+        liftStone();
+        PIDDrivebackward(.5,90,12);
+        dropStone();
+        PIDDriveForward(.5,90,12);
+        lowerStone();
+        RotateRight(.8,20);
+        resetAngle();
+        PIDDrivebackward(.8,90,35);
+        robot2.claw.setPosition(.9);
+
+    }
+
+    public void skystonePos3() {
+        // This method will drive the robot to Skystone Position 3
+        // Blinked in:  Change color SOLID BLUE to indicate we successfully Drove to the stone
+    }
+
+    public void skystonePos4() {
+        // This method will drive the robot to Skystone Position 4
+        // Blinked in:  Change color SOLID BLUE to indicate we successfully Drove to the stone
+    }
+
+    public void skystonePos5() {
+        // This method will drive the robot to Skystone Position 5
+        // Blinked in:  Change color SOLID BLUE to indicate we successfully Drove to the stone
+    }
+
+    public void skystonePos6() {
+        // This method will drive the robot to Skystone Position 6
+        // Blinked in:  Change color SOLID BLUE to indicate we successfully Drove to the stone
+    }
+
+
+    public void grabStone() {
+        //  This method will be used to grab the stone  and prepare it for delivery
+        robot2.claw.setPosition(.1);
 
 
     }
 
-    // This section is a placeholder for Vision Detection of the Skystone
-    //  Methods we can choose from include:
-    //     1. Using REV3 Color/Distance Sensor
-    //     2. Using TensorFlor Vision
-    //     3. Using OpenCV Vision
+    public void liftStone(){
+        robot2.LiftLeft.setPower(.75);
+        robot2.LiftRight.setPower(.75);
+        sleep(500);
+        robot2.LiftRight.setPower(.1);
+        robot2.LiftLeft.setPower(.1);
+    }
+
+    public void dropStone() {
+        robot2.claw.setPosition(.9);
+    }
+    public void lowerStone() {
+        robot2.LiftLeft.setPower(0);
+        robot2.LiftRight.setPower(0);
+    }
+
+    public void foundationGrab(){
+        // This method will be used to grab the Foundation an move it to the correct area
+        // Change BlinkIN color to SOLID YELLOW to signal foundation move
+        // First grab foundation
+        // Rotate Foundation
+        // Slide Foundation to Left
+
+    }
+
+    public void deliverStone1() {
+        // This method will deliver the stone from Position 1
+        // Rotation Robot to orient the stone facing the foundation
+        // Then drive forward to deliver the stone
+        // Grab Foundation and move                 call foundationGrab()
+        // Place stone
+        // Drive to Skybridge and park
+    }
+
+    public void deliverStone2() {
+        // This method will deliver the stone from Position 2
+        // Rotation Robot to orient the stone facing the foundation
+        // Then drive forward to deliver the stone
+        // Grab Foundation and move                 call foundationGrab()
+        // Place stone
+        // Drive to Skybridge and park
+    }
+
+    public void deliverStone3() {
+        // This method will deliver the stone from Position 3
+        // Rotation Robot to orient the stone facing the foundation
+        // Then drive forward to deliver the stone
+        // Grab Foundation and move                 call foundationGrab()
+        // Place stone
+        // Drive to Skybridge and park
+    }
+
+    public void deliverStone4() {
+        // This method will deliver the stone from Position 4
+        // Rotation Robot to orient the stone facing the foundation
+        // Then drive forward to deliver the stone
+        // Grab Foundation and move                 call foundationGrab()
+        // Place stone
+        // Drive to Skybridge and park
+    }
+
+    public void deliverStone5() {
+        // This method will deliver the stone from Position 5
+        // Rotation Robot to orient the stone facing the foundation
+        // Then drive forward to deliver the stone
+        // Grab Foundation and move
+        // Place stone
+        // Drive to Skybridge and park
+    }
+
+    public void deliverStone6() {
+        // This method will deliver the stone from Position 6
+        // Rotation Robot to orient the stone facing the foundation
+        // Then drive forward to deliver the stone
+        // Grab Foundation and move                 call foundationGrab()
+        // Place stone
+        // Drive to Skybridge and park
+    }
 
 
 
-    // This second is a placeholder for Moving the Foundation to the build zone corner
-    //  Place frame work here
-
-
-
-    // This is the last placeholder for returning to mid-field to gain the parking points.
-    // Pace framework here.
-
-
-
-
-// Ends runOpMode..... END OF Autonomous Main Program.....
-
-
-//     THIS SECTION BEGINS ALL OF THE PROGRAMS METHOD(S)
-//
-
+    // These Methods below control all motor Movements via PID
 
     public void setupIMU() {
         // Initalize IMU
@@ -443,9 +615,9 @@ public class BlueQuarry_FOUNDATION extends LinearOpMode {
 
             //Set Motor Power  - This engages the Motors and starts the robot movements
             robot2.DriveRightFront.setPower(speed + correction);
-            robot2.DriveLeftFront.setPower(speed + correction);
+            robot2.DriveLeftFront.setPower(speed + correction );
             robot2.DriveRightRear.setPower(speed + correction);
-            robot2.DriveLeftRear.setPower(speed + correction);
+            robot2.DriveLeftRear.setPower(speed + correction );
         }    // This brace closes out the while loop
 
         //Reset Encoders
@@ -492,24 +664,23 @@ public class BlueQuarry_FOUNDATION extends LinearOpMode {
 
 
         //  Reset Encoders:    Alternate way:  DriveRightFrontEncoder.reset();
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        sleep(500);
 
         robot2.DriveRightFront.setTargetPosition(0);
         robot2.DriveRightRear.setTargetPosition(0);
         robot2.DriveLeftFront.setTargetPosition(0);
         robot2.DriveLeftRear.setTargetPosition(0);
 
-
         // Set RUN_TO_POSITION
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        sleep(500);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        //sleep(500);
 
         // Stop Motors and set Motor Power to 0
         //PIDstopALL()
@@ -541,10 +712,10 @@ public class BlueQuarry_FOUNDATION extends LinearOpMode {
         }    // This brace closes out the while loop
 
         //Reset Encoders
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
         //PIDstopALL()
         robot2.DriveRightFront.setPower(0);
@@ -589,12 +760,10 @@ public class BlueQuarry_FOUNDATION extends LinearOpMode {
         robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-
         robot2.DriveRightFront.setTargetPosition(0);
         robot2.DriveRightRear.setTargetPosition(0);
         robot2.DriveLeftFront.setTargetPosition(0);
         robot2.DriveLeftRear.setTargetPosition(0);
-
 
         // Set RUN_TO_POSITION
         robot2.DriveRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -677,23 +846,21 @@ public class BlueQuarry_FOUNDATION extends LinearOpMode {
 
 
         //  Reset Encoders:    Alternate way:  DriveRightFrontEncoder.reset();
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
         robot2.DriveRightFront.setTargetPosition(0);
         robot2.DriveRightRear.setTargetPosition(0);
         robot2.DriveLeftFront.setTargetPosition(0);
         robot2.DriveLeftRear.setTargetPosition(0);
 
-
         // Set RUN_TO_POSITION
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
         sleep(500);
 
         // Stop Motors and set Motor Power to 0
@@ -708,10 +875,10 @@ public class BlueQuarry_FOUNDATION extends LinearOpMode {
 
 
         // Set Target
-        robot2.DriveRightFront.setTargetPosition((int) -InchesMoving);
-        robot2.DriveLeftFront.setTargetPosition((int) InchesMoving);
-        robot2.DriveRightRear.setTargetPosition((int) InchesMoving);
-        robot2.DriveLeftRear.setTargetPosition((int) -InchesMoving);
+        robot2.DriveRightFront.setTargetPosition((int) InchesMoving);
+        robot2.DriveLeftFront.setTargetPosition((int) -InchesMoving);
+        robot2.DriveRightRear.setTargetPosition((int) -InchesMoving);
+        robot2.DriveLeftRear.setTargetPosition((int) InchesMoving);
 
 
         while (robot2.DriveRightFront.isBusy() && robot2.DriveRightRear.isBusy()
@@ -720,16 +887,16 @@ public class BlueQuarry_FOUNDATION extends LinearOpMode {
 
             //Set Motor Power  - This engages the Motors and starts the robot movements
             robot2.DriveRightFront.setPower(speed);
-            robot2.DriveLeftFront.setPower(speed);
+            robot2.DriveLeftFront.setPower(speed + correction);
             robot2.DriveRightRear.setPower(speed + correction);
             robot2.DriveLeftRear.setPower(speed);
         }    // This brace closes out the while loop
 
         //Reset Encoders
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
         // Stop Motors and set Motor Power to 0
         //PIDstopALL();
@@ -771,23 +938,21 @@ public class BlueQuarry_FOUNDATION extends LinearOpMode {
 
 
         //  Reset Encoders:    Alternate way:  DriveRightFrontEncoder.reset();
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
         robot2.DriveRightFront.setTargetPosition(0);
         robot2.DriveRightRear.setTargetPosition(0);
         robot2.DriveLeftFront.setTargetPosition(0);
         robot2.DriveLeftRear.setTargetPosition(0);
 
-
         // Set RUN_TO_POSITION
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
         sleep(500);
 
         // Stop Motors and set Motor Power to 0
@@ -802,10 +967,10 @@ public class BlueQuarry_FOUNDATION extends LinearOpMode {
 
 
         // Set Target
-        robot2.DriveRightFront.setTargetPosition((int) InchesMoving);
-        robot2.DriveLeftFront.setTargetPosition((int) -InchesMoving);
-        robot2.DriveRightRear.setTargetPosition((int) -InchesMoving);
-        robot2.DriveLeftRear.setTargetPosition((int) InchesMoving);
+        robot2.DriveRightFront.setTargetPosition((int)- InchesMoving);
+        robot2.DriveLeftFront.setTargetPosition((int) InchesMoving);
+        robot2.DriveRightRear.setTargetPosition((int) InchesMoving);
+        robot2.DriveLeftRear.setTargetPosition((int) -InchesMoving);
 
 
         while (robot2.DriveRightFront.isBusy() && robot2.DriveRightRear.isBusy()
@@ -820,10 +985,10 @@ public class BlueQuarry_FOUNDATION extends LinearOpMode {
         }    // This brace closes out the while loop
 
         //Reset Encoders
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
         // Stop Motors and set Motor Power to 0
         //PIDstopALL();
@@ -836,11 +1001,15 @@ public class BlueQuarry_FOUNDATION extends LinearOpMode {
 
 
     public void RotateLeft(double speed, int distance) {
+
+        //Initialize Mecanum Wheel DC Motor Behavior
+        //setZeroPowerBrakes();   // Set DC Motor Brake Behavior
+
         // Reset Encoders
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         sleep(500);
 
 
@@ -849,13 +1018,13 @@ public class BlueQuarry_FOUNDATION extends LinearOpMode {
         robot2.DriveLeftFront.setTargetPosition(0);
         robot2.DriveLeftRear.setTargetPosition(0);
 
-
         // Set RUN_TO_POSITION
 
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        sleep(500);
 
         // Set Motor Power to 0
         robot2.DriveRightFront.setPower(0);
@@ -887,39 +1056,56 @@ public class BlueQuarry_FOUNDATION extends LinearOpMode {
         }  // THis brace close out the while Loop
 
         //Reset Encoders
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
         robot2.DriveRightFront.setPower(0);
         robot2.DriveRightRear.setPower(0);
         robot2.DriveLeftFront.setPower(0);
         robot2.DriveLeftRear.setPower(0);
 
+        robot2.DriveRightFront.setTargetPosition(0);
+        robot2.DriveRightRear.setTargetPosition(0);
+        robot2.DriveLeftFront.setTargetPosition(0);
+        robot2.DriveLeftRear.setTargetPosition(0);
+
+        // Set RUN_TO_POSITION
+
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        sleep(500);
+
+
     } // This brace closes out RotateLeft
 
     public void RotateRight(double speed, int distance) {
-        // Reset Encoders
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        sleep(500);
 
+        //Initialize Mecanum Wheel DC Motor Behavior
+        //setZeroPowerBrakes();   // Set DC Motor Brake Behavior
+
+        // Reset Encoders
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        sleep(500);
 
         robot2.DriveRightFront.setTargetPosition(0);
         robot2.DriveRightRear.setTargetPosition(0);
         robot2.DriveLeftFront.setTargetPosition(0);
         robot2.DriveLeftRear.setTargetPosition(0);
 
-
         // Set RUN_TO_POSITION
 
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        sleep(500);
 
         // Set Motor Power to 0
         robot2.DriveRightFront.setPower(0);
@@ -951,10 +1137,10 @@ public class BlueQuarry_FOUNDATION extends LinearOpMode {
         }  // THis brace close out the while Loop
 
         //Reset Encoders
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
 
         robot2.DriveRightFront.setPower(0);
@@ -962,6 +1148,7 @@ public class BlueQuarry_FOUNDATION extends LinearOpMode {
         robot2.DriveLeftFront.setPower(0);
         robot2.DriveLeftRear.setPower(0);
     }  // This brace closes out RotateRight Method
+
 
 
 
@@ -974,98 +1161,16 @@ public class BlueQuarry_FOUNDATION extends LinearOpMode {
         robot2.DriveLeftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
+    private void PIDstopALL () {
+        // Reset Encoders
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        sleep(500);
 
-    public boolean capDetect (boolean isFound) {
-
-        //boolean isFound;
-
-        // hsvValues is an array that will hold the hue, saturation, and value information.
-        float hsvValues[] = {0F, 0F, 0F};
-
-        // values is a reference to the hsvValues array.
-        final float values[] = hsvValues;
-
-        // sometimes it helps to multiply the raw RGB values with a scale factor
-        // to amplify/attentuate the measured values.
-        final double SCALE_FACTOR = 255;
-
-        // get a reference to the RelativeLayout so we can change the background
-        // color of the Robot Controller app to match the hue detected by the RGB sensor.
-        int relativeLayoutId = hardwareMap.appContext.getResources().getIdentifier("RelativeLayout", "id", hardwareMap.appContext.getPackageName());
-        final View relativeLayout = ((Activity) hardwareMap.appContext).findViewById(relativeLayoutId);
-
-        int RevCondition = 3;      // 3 = Using Rev Color Sensor V3;  2 = Using Rev Color Sensor V2(older)
-        int ColorCondition = 0;    // Initialize ColorCondition variable to zero
-
-        //  END OF Capston Configuration setup parameters
-
-        // convert the RGB values to HSV values.
-        // multiply by the SCALE_FACTOR.
-        // then cast it back to int (SCALE_FACTOR is a double)
-        Color.RGBToHSV((int) (robot2.sensorColorR.red() * SCALE_FACTOR),
-                (int) (robot2.sensorColorR.green() * SCALE_FACTOR),
-                (int) (robot2.sensorColorR.blue() * SCALE_FACTOR),
-                hsvValues);
-
-
-        //  This is the algorithm to Normailze the Blue channel.
-    /*
-      Concept:
-         Normailize the Blue channel.    Multiple the Red * Gree deviced by Blue^2
-         If the Color Condition <= RevCondition # (3); then we are seeing the capstone (black)
-          otherwise we are seeing soemthing other than black, and not seeing the capston
-          Courtesy of FTC 5898 Youtube Explaination.  (https://www.youtube.com/watch?v=i0AskHFkZ94)
-     */
-        ColorCondition = (robot2.sensorColorR.red() / robot2.sensorColorR.blue() * (robot2.sensorColorR.green() / robot2.sensorColorR.blue()));
-
-        if(ColorCondition <= RevCondition) {
-            telemetry.addLine("capstone detected");
-            isFound = true;
-            return isFound;
-        } else
-            telemetry.addLine("Capstone Not Detected");
-        isFound = false;
-        return isFound;
     }
-
-    public boolean capDetect () {
-        //boolean isFound;
-        // hsvValues is an array that will hold the hue, saturation, and value information.
-        float hsvValues[] = {0F, 0F, 0F};
-        // values is a reference to the hsvValues array.
-        final float values[] = hsvValues;
-        // sometimes it helps to multiply the raw RGB values with a scale factor
-        // to amplify/attentuate the measured values.
-        final double SCALE_FACTOR = 255;
-        // get a reference to the RelativeLayout so we can change the background
-        // color of the Robot Controller app to match the hue detected by the RGB sensor.
-        int relativeLayoutId = hardwareMap.appContext.getResources().getIdentifier("RelativeLayout", "id", hardwareMap.appContext.getPackageName());
-        final View relativeLayout = ((Activity) hardwareMap.appContext).findViewById(relativeLayoutId);
-        int RevCondition = 3;      // 3 = Using Rev Color Sensor V3;  2 = Using Rev Color Sensor V2(older)
-        int ColorCondition = 0;    // Initialize ColorCondition variable to zero
-        //  END OF Capston Configuration setup parameters
-        // convert the RGB values to HSV values.
-        // multiply by the SCALE_FACTOR.
-        // then cast it back to int (SCALE_FACTOR is a double)
-        Color.RGBToHSV((int) (robot2.sensorColorR.red() * SCALE_FACTOR),
-                (int) (robot2.sensorColorR.green() * SCALE_FACTOR),
-                (int) (robot2.sensorColorR.blue() * SCALE_FACTOR),
-                hsvValues);
-        //  This is the algorithm to Normailze the Blue channel.
-    /*
-      Concept:
-         Normailize the Blue channel.    Multiple the Red * Gree deviced by Blue^2
-         If the Color Condition <= RevCondition # (3); then we are seeing the capstone (black)
-          otherwise we are seeing soemthing other than black, and not seeing the capston
-          Courtesy of FTC 5898 Youtube Explaination.  (https://www.youtube.com/watch?v=i0AskHFkZ94)
-     */
-        ColorCondition = (robot2.sensorColorR.red() / robot2.sensorColorR.blue() * (robot2.sensorColorR.green() / robot2.sensorColorR.blue()));
-        if(ColorCondition <= RevCondition) {
-            telemetry.addData("Color Condition equals: ", ColorCondition);
-            return true;
-        } else
-        return false;
-    }
-
 
 }
+
+

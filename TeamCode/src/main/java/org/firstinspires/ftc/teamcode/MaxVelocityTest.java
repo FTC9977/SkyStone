@@ -5,6 +5,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import org.firstinspires.ftc.teamcode.DbgLog;
+
 
 
 /*
@@ -21,7 +23,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
  */
 
 
-@TeleOp
+@TeleOp(name="MaxVelocity", group = "pid-test")
 public class MaxVelocityTest extends LinearOpMode {
     public DcMotorEx DriveLeftFront = null;
     public DcMotorEx DriveLeftRear = null;
@@ -30,7 +32,6 @@ public class MaxVelocityTest extends LinearOpMode {
 
     double currentVelocityLF, currentVelocityRF, currentVelocityLR, currentVelocityRR;
     double maxVelocity = 0.0;
-
 
     @Override
     public void runOpMode() {
@@ -41,6 +42,14 @@ public class MaxVelocityTest extends LinearOpMode {
         DriveLeftRear = (DcMotorEx)hardwareMap.get(DcMotor.class, "LR");
         DriveRightFront = (DcMotorEx)hardwareMap.get(DcMotor.class, "RF");
         DriveRightRear = (DcMotorEx)hardwareMap.get(DcMotor.class, "RR");
+
+
+
+
+        DriveRightFront.setDirection(DcMotorEx.Direction.FORWARD);
+        DriveRightRear.setDirection(DcMotorEx.Direction.FORWARD);
+        DriveLeftFront.setDirection(DcMotorEx.Direction.REVERSE);
+        DriveLeftRear.setDirection(DcMotorEx.Direction.REVERSE);
 
         DriveLeftFront.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         DriveLeftRear.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
@@ -72,9 +81,18 @@ public class MaxVelocityTest extends LinearOpMode {
             telemetry.addData("current DriveRightFront Velocity: ", currentVelocityRF);
             telemetry.addData("curret DriveRightRear Velocity: ", currentVelocityRR);
             telemetry.addData("Maxmimum Velocity: ", maxVelocity);      // This is the value we need for performing our calculations
+
+            DbgLog.msg("--------------");
+            DbgLog.msg("   Velocity Values");
+            DbgLog.msg(" Current DriveLeftFront Velocity: ", currentVelocityLF);
+            DbgLog.msg(" Current DriveLeftRear Velocity: ", currentVelocityLR);
+            DbgLog.msg(" Current DriveRightFront Velocity: ", currentVelocityRF);
+            DbgLog.msg(" Current DriveRightRear Velocity: ", currentVelocityRR);
+            DbgLog.msg("--------------");
+
             telemetry.update();
 
-            sleep(10000);  // Run for 10 seconds
+            sleep(3000);  // Run for 5 seconds
 
             // Turn off motors
             DriveRightFront.setPower(0);
@@ -82,8 +100,8 @@ public class MaxVelocityTest extends LinearOpMode {
             DriveLeftFront.setPower(0);
             DriveLeftRear.setPower(0);
 
-            DriveLeftRear.setVelocityPIDFCoefficients(1.26,.126,0,12.6);
-            DriveLeftRear.setPositionPIDFCoefficients(5.0);
+            //DriveLeftRear.setVelocityPIDFCoefficients(1.26,.126,0,12.6);
+            //DriveLeftRear.setPositionPIDFCoefficients(5.0);
 
         }
     }

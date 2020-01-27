@@ -16,6 +16,7 @@ public class Encoder {
     final static int NV60_COUNTS_PER_MOTOR_REV = 1680;       // NeveRest 60 Motor Tick Count
 
 
+
     public Encoder(DcMotor motor, int type, double diam) {
         this.motor = motor;
         this.type = type;
