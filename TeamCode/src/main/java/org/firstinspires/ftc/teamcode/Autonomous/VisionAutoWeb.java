@@ -128,26 +128,23 @@ public class VisionAutoWeb extends RobotWebcam {
             DbgLog.msg("--------------");
             DbgLog.msg("   Driving to Skystone Position 1");
             DbgLog.msg("--------------");
-            //PIDDrivebackward(.80 ,90,27);
+            
             skystonePos1();             // Call Method to drive to position 1
-            //grabStone();                // Call Method to Grab stone
-            //deliverStone1();            // Call method to Drive to Foundataion, move it, deliver stone, and drive to bridge and park
+
         } else if (stoneONE == 2) {
             telemetry.addLine(" Driving to Skystone Position 2");
             DbgLog.msg("--------------");
             DbgLog.msg("   Driving to Skystone Position 2");
             DbgLog.msg("--------------");
             skystonePos2();             // Call Method to drive to position 1
-            grabStone();                // Call Method to Grab Stone
-            deliverStone2();            // Call Method to Drive to Foundation, move it, deliver stone, and drive to bridge and park
+
         } else {
             telemetry.addLine("Driving to Skystone Position 3");
             DbgLog.msg("--------------");
             DbgLog.msg("   Driving to Skystone Position 3");
             DbgLog.msg("--------------");
             skystonePos3();             // Call Method to drive to position 3
-            grabStone();                // Call Method to Grab Stone
-            deliverStone3();            // Call Method to Drive to Foundation, move it, deliver stone, and drive to bridge and park
+
          }
 
 
@@ -303,7 +300,7 @@ public class VisionAutoWeb extends RobotWebcam {
         */
     }
 
-    
+
 
     public void skystonePos2() {
         // This method will drive the robot to Skyston Positon 2
@@ -336,6 +333,28 @@ public class VisionAutoWeb extends RobotWebcam {
     public void skystonePos3() {
         // This method will drive the robot to Skystone Position 3
         // Blinked in:  Change color SOLID BLUE to indicate we successfully Drove to the stone
+        PIDDriveStrafeRight(.5,90,18);
+        PIDDrivebackward(.5,90,29);
+        grabStone();
+        sleep(400);
+        PIDDriveForward(.80,90,5);
+
+
+        RotateLeft(.8,21);
+        resetAngle();
+        PIDDrivebackward(.5,90,85);
+        RotateRight(.8,21);
+        resetAngle();
+        liftStone();
+        PIDDrivebackward(.5,90,12);
+        dropStone();
+        PIDDriveForward(.5,90,12);
+        lowerStone();
+        RotateRight(.8,20);
+        resetAngle();
+        PIDDrivebackward(.8,90,40);
+        robot2.claw.setPosition(.9);
+
     }
 
     public void skystonePos4() {
