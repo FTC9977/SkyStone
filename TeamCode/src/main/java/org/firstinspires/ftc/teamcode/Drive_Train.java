@@ -42,15 +42,15 @@ public class Drive_Train extends LinearOpMode {
     private static DcMotor rightBackWheel;
     private static DcMotor LiftLeft;
     private static DcMotor LiftRight;
-    private static DcMotor InRight;
-    private static DcMotor InLeft;
-    private static Servo   ArmServo1,LHook,RHook,PurpleArmLeft,GreenArmRight,ArmServo2,claw;
+   // private static DcMotor InRight;
+   // private static DcMotor InLeft;
+    private static Servo   ArmServo1/*,LHook,RHook,PurpleArmLeft,GreenArmRight*/,ArmServo2,claw;
     int A;
     int B;
     int C;
-    private static RevBlinkinLedDriver blinkinLedDriver;
+   // private static RevBlinkinLedDriver blinkinLedDriver;
     private static RevBlinkinLedDriver.BlinkinPattern pattern;
-    private static TouchSensor Touch;
+   // private static TouchSensor Touch;
 
     ElapsedTime runtime = new ElapsedTime();
 
@@ -65,21 +65,21 @@ public class Drive_Train extends LinearOpMode {
         LiftLeft = hardwareMap.dcMotor.get(UniversalConstants.LiftLeft);
         LiftRight = hardwareMap.dcMotor.get(UniversalConstants.LiftRight);
 
-        InLeft = hardwareMap.dcMotor.get(UniversalConstants.InLeft);
-        InRight = hardwareMap.dcMotor.get(UniversalConstants.InRight);
+       // InLeft = hardwareMap.dcMotor.get(UniversalConstants.InLeft);
+       // InRight = hardwareMap.dcMotor.get(UniversalConstants.InRight);
 
         ArmServo1 = hardwareMap.servo.get(UniversalConstants.ArmServo1);
         ArmServo2 = hardwareMap.servo.get(UniversalConstants.ArmServo2);
-        LHook = hardwareMap.servo.get(UniversalConstants.LHook);
-        RHook = hardwareMap.servo.get(UniversalConstants.RHook);
-        PurpleArmLeft = hardwareMap.servo.get(UniversalConstants.PurpleArmLeft);
-        GreenArmRight = hardwareMap.servo.get(UniversalConstants.GreenArmRight);
+       // LHook = hardwareMap.servo.get(UniversalConstants.LHook);
+       // RHook = hardwareMap.servo.get(UniversalConstants.RHook);
+       // PurpleArmLeft = hardwareMap.servo.get(UniversalConstants.PurpleArmLeft);
+       // GreenArmRight = hardwareMap.servo.get(UniversalConstants.GreenArmRight);
         claw = hardwareMap.servo.get(UniversalConstants.claw);
 
-        blinkinLedDriver = hardwareMap.get(RevBlinkinLedDriver.class, "lights");
+       // blinkinLedDriver = hardwareMap.get(RevBlinkinLedDriver.class, "lights");
         pattern = RevBlinkinLedDriver.BlinkinPattern.AQUA;
 
-        Touch = hardwareMap.touchSensor.get( "touch");
+       // Touch = hardwareMap.touchSensor.get( "touch");
 
 
         LiftLeft.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -89,8 +89,8 @@ public class Drive_Train extends LinearOpMode {
         rightFrontWheel.setDirection(DcMotorSimple.Direction.REVERSE);
 
 
-        InLeft.setDirection(DcMotorSimple.Direction.REVERSE);
-        blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.BEATS_PER_MINUTE_LAVA_PALETTE);
+       // InLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+       // blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.BEATS_PER_MINUTE_LAVA_PALETTE);
 
         waitForStart();
          A = 0;
@@ -101,15 +101,15 @@ public class Drive_Train extends LinearOpMode {
 
             if (gamepad1.x && (A <= 0)){
                claw.setPosition(.1); // close
-                A = A +1;
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
+                A = A +2;
+              //  blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
             }else if (gamepad1.x && (A >= 1)){
                 claw.setPosition(.9); // open
-                A = A -1;
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
+                A = 0;
+              //  blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
             }
 
-
+            /*
             if (gamepad1.left_bumper){
                 PurpleArmLeft.setPosition(.99);
                 //GreenArmRight.setPosition(.1);
@@ -125,6 +125,7 @@ public class Drive_Train extends LinearOpMode {
                 LHook.setPosition(.5);
                 RHook.setPosition(.4);
             }
+             */
 
             if (gamepad1.a) {
                  LiftLeft.setPower(.75);
@@ -136,7 +137,7 @@ public class Drive_Train extends LinearOpMode {
                 LiftLeft.setPower(.1);
                 LiftRight.setPower(.1);
             }
-
+            /*
 
             if (gamepad1.dpad_down){
                 InLeft.setPower(.5);
@@ -151,6 +152,8 @@ public class Drive_Train extends LinearOpMode {
                 InRight.setPower(0);
                 B = 0 ;
             }
+
+             */
 
             if (gamepad1.dpad_up || gamepad1.dpad_down ){
                 ArmServo1.setPosition(.7);   // Raise it to accept block
@@ -169,7 +172,7 @@ public class Drive_Train extends LinearOpMode {
                  ArmServo1.setPosition(.9);
                  ArmServo2.setPosition(.1);
              }
-
+            /*
              if (Touch.isPressed()){
                  blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
              } else if ((Touch.isPressed()== false) && A <= 0){
@@ -206,7 +209,7 @@ public class Drive_Train extends LinearOpMode {
             }
             */
 
-            double inputY = Math.abs(-gamepad1.left_stick_y) > ACCEPTINPUTTHRESHOLD ? -gamepad1.left_stick_y : 0;
+            double inputY = Math.abs(gamepad1.left_stick_y) > ACCEPTINPUTTHRESHOLD ? gamepad1.left_stick_y : 0;
             double inputX = Math.abs(gamepad1.left_stick_x) > ACCEPTINPUTTHRESHOLD ? gamepad1.left_stick_x : 0;
             double inputC = Math.abs(-gamepad1.right_stick_x) > ACCEPTINPUTTHRESHOLD ? gamepad1.right_stick_x : 0;
 

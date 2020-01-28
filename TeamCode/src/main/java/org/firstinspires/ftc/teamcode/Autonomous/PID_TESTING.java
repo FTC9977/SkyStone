@@ -72,7 +72,7 @@ public class PID_TESTING extends LinearOpMode {
     //Define Drivetrain Variabeles
 
     static final double COUNTS_PER_MOTOR_REV = 753.2;   // Andymark 40 Motor Tick Count
-    static final double DRIVE_GEAR_REDUCTION = 1;    // This is > 1.0 if motors are geared up ____  Using OVerdrive gearing with Pico Uno boxes  40 gear to 35 gear over-drive
+    static final double DRIVE_GEAR_REDUCTION = .5;    // This is > 1.0 if motors are geared up ____  Using OVerdrive gearing with Pico Uno boxes  40 gear to 35 gear over-drive
     static final double WHEEL_DIAMETER_INCHES = 4.0;   // For figuring out circumfrance
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
 
@@ -107,6 +107,13 @@ public class PID_TESTING extends LinearOpMode {
 
 
       PIDDriveForward(.5,90,24); // Drive Forward @ 75% power, 90 degrees, 24"
+
+     telemetry.addData("LeftRear ",robot2.DriveLeftRear.getTargetPositionTolerance());
+     telemetry.addData("LeftFront ", robot2.DriveLeftFront.getTargetPositionTolerance());
+     telemetry.addData("RightRear ", robot2.DriveRightRear.getTargetPositionTolerance());
+     telemetry.addData("RightFront ", robot2.DriveRightFront.getTargetPositionTolerance());
+     telemetry.update();
+
     // RotateRight(.5,2);
      //PIDDriveForward(1,90,24); // Drive Forward at 100% power, 90 degress, 24"
 
