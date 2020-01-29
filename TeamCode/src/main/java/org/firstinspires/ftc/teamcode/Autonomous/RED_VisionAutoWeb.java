@@ -8,24 +8,19 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.teamcode.DbgLog;
 import org.firstinspires.ftc.teamcode.DriveTrain.PIDController;
-import org.firstinspires.ftc.teamcode.HardwareMap.Robot;
 import org.firstinspires.ftc.teamcode.HardwareMap.RobotWebcam;
 import org.firstinspires.ftc.teamcode.HardwareMap.skyHardwareMap2;
 
 
+@Autonomous(name="RED_VisionAutoWeb", group="csweb")
 
-
-@Autonomous(name="AutoVisionWeb", group="csweb")
-
-public class VisionAutoWeb extends RobotWebcam {
+public class RED_VisionAutoWeb extends RobotWebcam {
 
     VuforiaStuff.skystonePos pos;
     int stoneDiff, stoneONE, stoneTWO;
@@ -72,34 +67,82 @@ public class VisionAutoWeb extends RobotWebcam {
 
 
 
-        pos = vuforiaStuff.vuforiascan(true, false);      // Boolean red: Flase signals we are starting in the Blue Alliance
-        switch (pos) {
-            case LEFT:
-                telemetry.addLine("Skystone position is LEFT");
-                telemetry.update();
-                //sleep(5000);
-                stoneDiff = 0;
-                stoneONE = 1;           // First Skystone is in Position 1
-                stoneTWO = 4;           // Second Skystone is in Position 4 (2nd Left Position)
+        pos = vuforiaStuff.vuforiascan(true, true);             // Boolean red: TRUE signals we are starting in the RED Alliance
 
+        /*
+            FOR The RED Side, the LEFT and RIGHT detection case statements are reverserd, as compared with the BLUE Side.
+
+            For Blue:
+             Position 1 = LEFT
+             Position 2 = CENTER
+             Position 3 = RIGHT
+             Position 4 = LEFT
+             Position 5 = CENTER
+             Position 6 = RIGHT    (Closest to the Perimeter Wall)
+
+            For RED:
+             Position 1 = RIGHT
+             Position 2 = CENTER
+             Position 3 = LEFT
+             Position 4 = RIGHT
+             Position 5 = CENTER
+             Position 6 = LEFT   (Closest to Perimeter Wall)
+
+             Example Case Statement Re-write for RED ONLY:
+
+         switch (pos) {
+            case LEFT:
+                telemetry.addLine("Skystone position is LEFT (Position 3)");
+                telemetry.update();
+                stoneDiff = 0;
+                stoneONE = 3;           // First Skystone is in Position 3
+                stoneTWO = 6;           // Second Skystone is in Position 6 (2nd Left Position, Closest to the Perimeter Wall)
                 // Blinked in:  Change color Flashing GREEN to indicate we found the stone
                 break;
+
             case CENTER:
-                telemetry.addLine("Skystone position is CENTER");
+                telemetry.addLine("Skystone position is CENTER (Position 2)");
                 telemetry.update();
-                //sleep(5000);
                 stoneDiff = 16;
                 stoneONE = 2;           // First Skystone is in Position 2
                 stoneTWO = 5;           // Second Skytone is in Position 5 (2nd Center Position)
                 // Blinked in:  Change color Flashing GREEN to indicate we found the stone
                 break;
             case RIGHT:
-                telemetry.addLine("Skystone Position is RIGHT");
+                telemetry.addLine("Skystone Position is Right (Position 1)");
                 telemetry.update();
-                sleep(500);
                 stoneDiff = 20;
+                stoneONE = 1;           // First Skystone is in Position 1
+                stoneTWO = 4;           // Second Skystone is in Postion 4 (2nd Right Position)
+                // Blinked in:  Change color Flashing GREEN to indicate we found the stone
+                break;
+        }
+
+         */
+        switch (pos) {
+            case LEFT:
+                telemetry.addLine("Skystone position is LEFT (Position 3)");
+                telemetry.update();
+                stoneDiff = 0;
                 stoneONE = 3;           // First Skystone is in Position 3
-                stoneTWO = 6;           // Second Skystone is in Postion 6 (2nd Right Positon)
+                stoneTWO = 6;           // Second Skystone is in Position 6 (2nd Left Position, Closest to the Perimeter Wall)
+                // Blinked in:  Change color Flashing GREEN to indicate we found the stone
+                break;
+
+            case CENTER:
+                telemetry.addLine("Skystone position is CENTER (Position 2)");
+                telemetry.update();
+                stoneDiff = 16;
+                stoneONE = 2;           // First Skystone is in Position 2
+                stoneTWO = 5;           // Second Skytone is in Position 5 (2nd Center Position)
+                // Blinked in:  Change color Flashing GREEN to indicate we found the stone
+                break;
+            case RIGHT:
+                telemetry.addLine("Skystone Position is Right (Position 1)");
+                telemetry.update();
+                stoneDiff = 20;
+                stoneONE = 1;           // First Skystone is in Position 1
+                stoneTWO = 4;           // Second Skystone is in Postion 4 (2nd Right Position)
                 // Blinked in:  Change color Flashing GREEN to indicate we found the stone
                 break;
         }
@@ -122,11 +165,13 @@ public class VisionAutoWeb extends RobotWebcam {
 
         // Setup Drive Commands to get to 1 out of 6 stone Positions
 
+        // Note for
+
 
         if(stoneONE == 1) {
             telemetry.addLine("Driving to Skystone Position 1");
             DbgLog.msg("--------------");
-            DbgLog.msg("   Driving to Skystone Position 1");
+            DbgLog.msg("   Driving to Skystone  RIGHT Position 1");
             DbgLog.msg("--------------");
 
             skystonePos1();             // Call Method to drive to position 1
@@ -134,14 +179,14 @@ public class VisionAutoWeb extends RobotWebcam {
         } else if (stoneONE == 2) {
             telemetry.addLine(" Driving to Skystone Position 2");
             DbgLog.msg("--------------");
-            DbgLog.msg("   Driving to Skystone Position 2");
+            DbgLog.msg("   Driving to Skystone CENTER Position 2");
             DbgLog.msg("--------------");
             skystonePos2();             // Call Method to drive to position 1
 
         } else {
             telemetry.addLine("Driving to Skystone Position 3");
             DbgLog.msg("--------------");
-            DbgLog.msg("   Driving to Skystone Position 3");
+            DbgLog.msg("   Driving to Skystone LEFT Position 3");
             DbgLog.msg("--------------");
             skystonePos3();             // Call Method to drive to position 3
 
@@ -163,7 +208,7 @@ public class VisionAutoWeb extends RobotWebcam {
  *
  *
  *																								      |
- *	   																							      |
+ *	   BLUE SIDE:																							      |
  *       																							  |
  *      [ bridge ]    [Position1]  [Position2] [Position 3]  [Position 4]  [Position 5] [Position 6]  |
  *  																							 	  |   Perimeter Wall
@@ -173,6 +218,19 @@ public class VisionAutoWeb extends RobotWebcam {
  *  																					         /	  |
  *  																					        /	  |
  *  			--------------------------------------------------------------------------------------|
+ *
+ *    RED SIDE:
+ *
+ *                     [Position 6]  [Position 5]  [Position 4] [Position 3]  [Position 2]  [Position 1]      [Bridge]
+ *  Perimeter Wall
+ *  		|
+ *  		|
+ *  		|\
+ *  		| \
+ *  		|  \
+ *  		|------------------------------------------------------------------------------------------------------------
+ *
+
  *
  *
  * Autonomous Sequence of Events:
@@ -266,7 +324,7 @@ public class VisionAutoWeb extends RobotWebcam {
  *
  */
 
-    public void skystonePos1() {
+    public void skystonePos1() {                                                                    // FOR RED SIDE, this section drives the robot to RIGHT - Position 1 (closest to the bridge)
         // This method will drive the robot to Skystone Position 1 (Closest to the bridge)
         // Blinked in:  Change color SOLID BLUE to indicate we successfully Drove to the stone
         PIDDrivebackward(.50,90,29);  // Gets Robot To Stone. -- WORKS
@@ -302,8 +360,8 @@ public class VisionAutoWeb extends RobotWebcam {
 
 
 
-    public void skystonePos2() {
-        // This method will drive the robot to Skyston Positon 2
+    public void skystonePos2() {                                                                    // FOR RED SIDE, this section drives the robot to CENTER - Position 2
+        // This method will drive the robot to Skystone Positon 2
         // Blinked in:  Change color SOLID BLUE to indicate we successfully Drove to the stone
         PIDDriveStrafeRight(.5,90,5);
         PIDDrivebackward(.50,90,29);  // Gets Robot To Stone. -- WORKS
@@ -330,7 +388,7 @@ public class VisionAutoWeb extends RobotWebcam {
 
     }
 
-    public void skystonePos3() {
+    public void skystonePos3() {                                                                    // FOR RED SIDE, this section drives the robot to LEFT - Position 3 (closest to the Perimeter Wall)
         // This method will drive the robot to Skystone Position 3
         // Blinked in:  Change color SOLID BLUE to indicate we successfully Drove to the stone
         PIDDriveStrafeRight(.5,90,18);
