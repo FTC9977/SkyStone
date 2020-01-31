@@ -5,29 +5,34 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-
-
 import org.firstinspires.ftc.teamcode.DbgLog;
 import org.firstinspires.ftc.teamcode.DriveTrain.PIDController;
-import org.firstinspires.ftc.teamcode.HardwareMap.Robot;
-import org.firstinspires.ftc.teamcode.HardwareMap.skyHardwareMap2;                      //  ** Using this only for the test robot.  For COMPETITION rotobit, change to skyHardwareMap()
+import org.firstinspires.ftc.teamcode.HardwareMap.RobotWebcamRED;
+import org.firstinspires.ftc.teamcode.HardwareMap.skyHardwareMap2;
 
 
-@Autonomous(name="AutoVision", group="calebs-robot")
+@Autonomous(name="RED VisionAutoWeb", group="calebs_robot")
 
-public class VisionAuto extends Robot {
+public class VisionAutoWebRED extends RobotWebcamRED {
 
-    VuforiaStuff.skystonePos pos;
+    VuforiaStuffRED.skystonePos pos;
     int stoneDiff, stoneONE, stoneTWO;
     skyHardwareMap2 robot2 = new skyHardwareMap2();     //  Setup file for all DC Motors, IMU, etc...  ** Using this HwMap only for Test robot.  Competition robot will use skyHardwareMap();
 
     ElapsedTime runtime = new ElapsedTime();
+
+    /**
+     * This is the webcam we are to use. As with other hardware devices such as motors and
+     * servos, this device is identified using the robot configuration tool in the FTC application.
+     */
+
 
 
     // Created Rev Robotics BlinkIN instances
@@ -54,29 +59,44 @@ public class VisionAuto extends Robot {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        robotInit();                                        // Used to Setup Vuforia Parameters
+        robot2.init(hardwareMap);
+        setupIMU();
+        sleep(500);
+        robotInit();         // Used to Setup Vuforia Parameters
 
-        pos = vuforiaStuff.vuforiascan(true, true);
+        PIDDrivebackward(.25,90,13);
+        sleep(500);
+
+
+
+        pos = vuforiaStuffRED.vuforiascan(true, true);      // Boolean red: Flase signals we are starting in the Blue Alliance
+
+
+
+
         switch (pos) {
             case LEFT:
+
                 telemetry.addLine("Skystone position is LEFT");
                 telemetry.update();
-                sleep(5000);
+                //sleep(5000);
                 stoneDiff = 0;
                 stoneONE = 1;           // First Skystone is in Position 1
                 stoneTWO = 4;           // Second Skystone is in Position 4 (2nd Left Position)
+
                 // Blinked in:  Change color Flashing GREEN to indicate we found the stone
                 break;
             case CENTER:
                 telemetry.addLine("Skystone position is CENTER");
                 telemetry.update();
-                sleep(5000);
+                //sleep(5000);
                 stoneDiff = 16;
                 stoneONE = 2;           // First Skystone is in Position 2
                 stoneTWO = 5;           // Second Skytone is in Position 5 (2nd Center Position)
                 // Blinked in:  Change color Flashing GREEN to indicate we found the stone
                 break;
             case RIGHT:
+
                 telemetry.addLine("Skystone Position is RIGHT");
                 telemetry.update();
                 sleep(500);
@@ -86,6 +106,10 @@ public class VisionAuto extends Robot {
                 // Blinked in:  Change color Flashing GREEN to indicate we found the stone
                 break;
         }
+
+
+
+
 
         /*if (pos == VuforiaStuff.skystonePos.LEFT) {
             telemetry.addLine("Were in the IF poss == VuforiaStuff.skystonePos.LEFT section");
@@ -101,39 +125,43 @@ public class VisionAuto extends Robot {
 
         // Setup Drive Commands to get to 1 out of 6 stone Positions
 
+
         if(stoneONE == 1) {
             telemetry.addLine("Driving to Skystone Position 1");
             DbgLog.msg("--------------");
             DbgLog.msg("   Driving to Skystone Position 1");
             DbgLog.msg("--------------");
-            skystonePos1();             // Call Method to drive to position 1
-            grabStone();                // Call Method to Grab stone
-            deliverStone1();            // Call method to Drive to Foundataion, move it, deliver stone, and drive to bridge and park
+
+            //skystonePos1();             // Call Method to drive to position 1
+
         } else if (stoneONE == 2) {
             telemetry.addLine(" Driving to Skystone Position 2");
             DbgLog.msg("--------------");
             DbgLog.msg("   Driving to Skystone Position 2");
             DbgLog.msg("--------------");
             skystonePos2();             // Call Method to drive to position 1
-            grabStone();                // Call Method to Grab Stone
-            deliverStone2();            // Call Method to Drive to Foundation, move it, deliver stone, and drive to bridge and park
+
         } else {
             telemetry.addLine("Driving to Skystone Position 3");
             DbgLog.msg("--------------");
             DbgLog.msg("   Driving to Skystone Position 3");
             DbgLog.msg("--------------");
             skystonePos3();             // Call Method to drive to position 3
-            grabStone();                // Call Method to Grab Stone
-            deliverStone3();            // Call Method to Drive to Foundation, move it, deliver stone, and drive to bridge and park
+
          }
 
+
+        //PIDDrivebackward(.80,90,27);
 
 
     }     //  END OF MAIN PROGRAM
 
 
-    // Methods to drive to Stones
-    /*
+// Main Autonomous Methods Section
+
+
+
+ /*
  *  Skystone Position Definitions
  *
  *
@@ -149,21 +177,221 @@ public class VisionAuto extends Robot {
  *  																					        /	  |
  *  			--------------------------------------------------------------------------------------|
  *
+ *
+ * Autonomous Sequence of Events:
+ *
+ *
+             Autonomous Sequence:
+
+
+             1. Raise Linear Lift (if needed) so web camera can function.  Make sure to do this only after waitForStart(), to avoid a penalty
+
+                UNLESS....  We can position the webcamera to see the stones ahead of time (before match officially begins), and make the
+                            determination which positions the stones are really in..  This would eliminate the need to raise the lift.
+
+
+                 raiseLift();   // Call this method to slightly raise the lift
+
+
+
+             2. Use webcamera to read Skystone Position and return a value of:  LEFT, CENTER, RIGHT
+
+
+             3. Now, using a switch Statement, we will direct the AS program to perform several Functions:
+
+                   - Also set two variables:  StoneONE and StoneTWO, to keep Track of where the second stone is located
+
+                   SkyStone  		StoneONE 	StoneTWO
+                   Position 		Position 	Position
+                   --------------------------------------
+                      LEFT				1			4
+                      CENTER			2			5
+                      RIGHT				3			6
+
+
+                   - Print Telemetry to the Driver Station telling them which stone they are driving to
+                   - Change the BlinkIn LED color to indicate to the driver the same information (Visual Feedback)
+                   - Call one of 6 Drive Methods, which are pre-programmed paths to get to the SkyStone Positions (1-6)
+                        - Within these drive methods, we will call other methods for:
+                            - Driving to Foundation
+                            - Placing stone
+                            - Moving Foundation
+                            - Driving to Bridge
+                            - Parking
+
+
+             4.	End of Delivering 1 or 2 stones we should be parked at the bridge.
+
+
+
+
+             SkyStone Position Methods:
+
+              - These methods will containt the PID drive parameters to move from the field wall (starting Position) to the skystone.
+              - Robot will start in the Quarry side, and our alliance partner in the build zone
+              - This is becuase we want the web camera to calculate the Skystone Position head on.
+
+             skystonePos1()
+             skystonePos2()
+             skystonePos3()
+             skystonePos4()
+             skystonePos5()
+             skystonePos6()
+
+
+
+
+            Grabbing the stone Method:
+
+                - This method will be used to grab the Skystone and raise the lift slightly off the ground for safe transport
+
+
+            grabStone()
+
+
+
+            Delivering Stone Methods:
+
+                - These methods will move the robot from the Quarry side, under the bridge, and to the foundation side
+                - There are six of these methods, since drive lengths from each of the SkyStone positions will be different, and we need to account for that.
+                - We will next grab the foundation here as well. We will consider using a Limit Switch to detect the Foundation
+                - Next, we will place the SkyStone on foundation (we dont care if it stacks or not, just places)
+                - Lastly, we will release the foundation and drive to the bridge
+                - End of AS mode
+
+            deliverStone1()
+            deliverStone2()
+            deliverStone3()
+            deliverStone4()
+            deliverStone5()
+            deliverStone6()
+ *
+ *
  */
 
     public void skystonePos1() {
         // This method will drive the robot to Skystone Position 1 (Closest to the bridge)
         // Blinked in:  Change color SOLID BLUE to indicate we successfully Drove to the stone
+
+     /*
+        PIDDrivebackward(.50,90,29);  // Gets Robot To Stone. -- WORKS
+        grabStone();                                        // Grab Stone -- WORKS
+        sleep(400);
+        PIDDriveForward(.80 ,90, 8); // Drive Forward towards wall -- WORKS
+       // sleep(500);
+        RotateLeft(.8,20);
+        resetAngle();
+       // sleep(500);
+        PIDDrivebackward(.5,90,70);
+        RotateRight(.8,21);
+        resetAngle();
+        liftStone();
+        PIDDrivebackward(.5,90,14);
+        dropStone();
+        PIDDriveForward(.5,90,14);
+        lowerStone();
+        RotateRight(.8,20);
+        resetAngle();
+        PIDDrivebackward(.8,90,35);
+    */
+
+
+
     }
 
+
+
     public void skystonePos2() {
-        // This method will drive the robot to Skyston Positon 2
+        /*// This method will drive the robot to Skyston Positon 2
         // Blinked in:  Change color SOLID BLUE to indicate we successfully Drove to the stone
+        PIDDriveStrafeRight(.5,90,5);
+        PIDDrivebackward(.50,90,29);  // Gets Robot To Stone. -- WORKS
+        grabStone();                                        // Grab Stone -- WORKS
+        sleep(400);
+        PIDDriveForward(.80 ,90, 5); // Drive Forward towards wall -- WORKS
+
+        // sleep(500);
+        RotateLeft(.6,24);
+        resetAngle();
+        // sleep(500);
+        PIDDrivebackward(.5,90,75);
+        RotateRight(.8,21);
+        resetAngle();
+        liftStone();
+        PIDDrivebackward(.5,90,12);
+        dropStone();
+        PIDDriveForward(.5,90,12);
+        lowerStone();
+        RotateRight(.8,20);
+        resetAngle();
+        PIDDrivebackward(.8,90,35);
+        robot2.claw.setPosition(.9);
+
+         */
+        PIDDriveStrafeRight(.5,90,5);
+        resetAngle();
+        PIDDrivebackward(.7,90,17);
+        grabStone();
+        sleep(800);
+        PIDDriveForward(.7,90,8);
+        RotateRight(.8,21);
+        PIDDrivebackward(.8,90, 82);
+        RotateLeft(.8, 21);
+        liftStone();
+        PIDDrivebackward(.8,90,14);
+        lowerStone();
+        dropStone();
+        PIDDriveForward(.8,90,6);
+        RotateRight(.8,21);
+        PIDDriveForward(.8 ,90, 45);
     }
 
     public void skystonePos3() {
         // This method will drive the robot to Skystone Position 3
         // Blinked in:  Change color SOLID BLUE to indicate we successfully Drove to the stone
+
+      /*
+        PIDDriveStrafeRight(.5,90,18);
+        PIDDrivebackward(.5,90,29);
+        grabStone();
+        sleep(400);
+        PIDDriveForward(.80,90,5);
+
+
+        RotateLeft(.8,21);
+        resetAngle();
+        PIDDrivebackward(.5,90,85);
+        RotateRight(.8,21);
+        resetAngle();
+        liftStone();
+        PIDDrivebackward(.5,90,12);
+        dropStone();
+        PIDDriveForward(.5,90,12);
+        lowerStone();
+        RotateRight(.8,20);
+        resetAngle();
+        PIDDrivebackward(.8,90,40);
+        robot2.claw.setPosition(.9);
+        */
+
+        PIDDriveStrafeRight(.5,90,13);
+        resetAngle();
+        PIDDrivebackward(.7,90,17);
+        grabStone();
+        sleep(800);
+        PIDDriveForward(.7,90,8);
+        RotateRight(.8,21);
+        PIDDrivebackward(.8,90, 75);
+        RotateLeft(.8, 21);
+        liftStone();
+        PIDDrivebackward(.8,90,14);
+        lowerStone();
+        dropStone();
+        PIDDriveForward(.8,90,8);
+        RotateRight(.8,21);
+        PIDDriveForward(.8 ,90, 45);
+
+
     }
 
     public void skystonePos4() {
@@ -184,6 +412,28 @@ public class VisionAuto extends Robot {
 
     public void grabStone() {
         //  This method will be used to grab the stone  and prepare it for delivery
+        robot2.claw.setPosition(.1);
+
+
+    }
+
+    public void liftStone(){
+        robot2.LiftLeft.setPower(.75);
+        robot2.LiftRight.setPower(.75);
+        sleep(500);
+        robot2.LiftRight.setPower(.1);
+        robot2.LiftLeft.setPower(.1);
+    }
+
+    public void dropStone() {
+        robot2.claw.setPosition(.9);
+    }
+    public void lowerStone() {
+        robot2.LiftLeft.setPower(-.5);
+        robot2.LiftRight.setPower(-.5);
+        sleep(400);
+        robot2.LiftLeft.setPower(0);
+        robot2.LiftRight.setPower(0);
     }
 
     public void foundationGrab(){
@@ -475,10 +725,11 @@ public class VisionAuto extends Robot {
 
 
         //  Reset Encoders:    Alternate way:  DriveRightFrontEncoder.reset();
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        sleep(500);
 
         robot2.DriveRightFront.setTargetPosition(0);
         robot2.DriveRightRear.setTargetPosition(0);
@@ -486,11 +737,11 @@ public class VisionAuto extends Robot {
         robot2.DriveLeftRear.setTargetPosition(0);
 
         // Set RUN_TO_POSITION
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        sleep(500);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        //sleep(500);
 
         // Stop Motors and set Motor Power to 0
         //PIDstopALL()
@@ -522,10 +773,10 @@ public class VisionAuto extends Robot {
         }    // This brace closes out the while loop
 
         //Reset Encoders
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
         //PIDstopALL()
         robot2.DriveRightFront.setPower(0);
@@ -656,10 +907,10 @@ public class VisionAuto extends Robot {
 
 
         //  Reset Encoders:    Alternate way:  DriveRightFrontEncoder.reset();
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
         robot2.DriveRightFront.setTargetPosition(0);
         robot2.DriveRightRear.setTargetPosition(0);
@@ -667,10 +918,10 @@ public class VisionAuto extends Robot {
         robot2.DriveLeftRear.setTargetPosition(0);
 
         // Set RUN_TO_POSITION
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
         sleep(500);
 
         // Stop Motors and set Motor Power to 0
@@ -703,10 +954,10 @@ public class VisionAuto extends Robot {
         }    // This brace closes out the while loop
 
         //Reset Encoders
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
         // Stop Motors and set Motor Power to 0
         //PIDstopALL();
@@ -748,10 +999,10 @@ public class VisionAuto extends Robot {
 
 
         //  Reset Encoders:    Alternate way:  DriveRightFrontEncoder.reset();
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
         robot2.DriveRightFront.setTargetPosition(0);
         robot2.DriveRightRear.setTargetPosition(0);
@@ -759,10 +1010,10 @@ public class VisionAuto extends Robot {
         robot2.DriveLeftRear.setTargetPosition(0);
 
         // Set RUN_TO_POSITION
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
         sleep(500);
 
         // Stop Motors and set Motor Power to 0
@@ -795,10 +1046,10 @@ public class VisionAuto extends Robot {
         }    // This brace closes out the while loop
 
         //Reset Encoders
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
         // Stop Motors and set Motor Power to 0
         //PIDstopALL();
@@ -811,12 +1062,17 @@ public class VisionAuto extends Robot {
 
 
     public void RotateLeft(double speed, int distance) {
+
+        //Initialize Mecanum Wheel DC Motor Behavior
+        //setZeroPowerBrakes();   // Set DC Motor Brake Behavior
+
         // Reset Encoders
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         sleep(500);
+
 
         robot2.DriveRightFront.setTargetPosition(0);
         robot2.DriveRightRear.setTargetPosition(0);
@@ -825,10 +1081,11 @@ public class VisionAuto extends Robot {
 
         // Set RUN_TO_POSITION
 
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        sleep(500);
 
         // Set Motor Power to 0
         robot2.DriveRightFront.setPower(0);
@@ -860,24 +1117,42 @@ public class VisionAuto extends Robot {
         }  // THis brace close out the while Loop
 
         //Reset Encoders
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
         robot2.DriveRightFront.setPower(0);
         robot2.DriveRightRear.setPower(0);
         robot2.DriveLeftFront.setPower(0);
         robot2.DriveLeftRear.setPower(0);
 
+        robot2.DriveRightFront.setTargetPosition(0);
+        robot2.DriveRightRear.setTargetPosition(0);
+        robot2.DriveLeftFront.setTargetPosition(0);
+        robot2.DriveLeftRear.setTargetPosition(0);
+
+        // Set RUN_TO_POSITION
+
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        sleep(500);
+
+
     } // This brace closes out RotateLeft
 
     public void RotateRight(double speed, int distance) {
+
+        //Initialize Mecanum Wheel DC Motor Behavior
+        //setZeroPowerBrakes();   // Set DC Motor Brake Behavior
+
         // Reset Encoders
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         sleep(500);
 
         robot2.DriveRightFront.setTargetPosition(0);
@@ -887,10 +1162,11 @@ public class VisionAuto extends Robot {
 
         // Set RUN_TO_POSITION
 
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        sleep(500);
 
         // Set Motor Power to 0
         robot2.DriveRightFront.setPower(0);
@@ -922,10 +1198,10 @@ public class VisionAuto extends Robot {
         }  // THis brace close out the while Loop
 
         //Reset Encoders
-        robot2.DriveRightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveRightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot2.DriveLeftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
 
         robot2.DriveRightFront.setPower(0);
@@ -937,12 +1213,23 @@ public class VisionAuto extends Robot {
 
 
 
+
     private void setZeroPowerBrakes() {
         //Initialize Mecanum Wheel DC Motor Behavior
         robot2.DriveRightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         robot2.DriveRightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         robot2.DriveLeftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         robot2.DriveLeftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    }
+
+    private void PIDstopALL () {
+        // Reset Encoders
+        robot2.DriveRightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveRightRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        robot2.DriveLeftRear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        sleep(500);
+
     }
 
 }

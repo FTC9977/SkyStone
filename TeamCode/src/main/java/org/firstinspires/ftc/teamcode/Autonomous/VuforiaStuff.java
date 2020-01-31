@@ -137,15 +137,15 @@ public class VuforiaStuff {
 
 
             if (red) {      // Assume your starting on the RED Alliance
-                cropStartX = (int) ((120.0 / 720.0) * bitmap.getWidth());           // 1/29/20    Was ((120.0 / 720)    changing to ((150.0 / 720)
-                cropStartY = (int) ((100.0 / 480.0) * bitmap.getHeight());
+                cropStartX = (int) ((0.0 / 720.0) * bitmap.getWidth());           // 1/29/20    Was ((120.0 / 720)    changing to ((150.0 / 720)
+                cropStartY = (int) ((30.0 / 480.0) * bitmap.getHeight());
                 cropWidth = (int) ((590.0 / 720.0) * bitmap.getWidth());            // 1/29/20    Was ((590.0 / 720)    changing to ((530.0 / 720)
-                cropHeight = (int) ((170.0 / 480.0) * bitmap.getHeight());          // 1/29/20    Was ((170.0 / 720)    changing to ((150.0 / 720)
+                cropHeight = (int) ((150.0 / 480.0) * bitmap.getHeight());          // 1/29/20    Was ((170.0 / 720)    changing to ((150.0 / 720)
             } else {      // Assume your starting the the Blue Alliance
                 cropStartX = (int) ((370.0 / 1280.0) * bitmap.getWidth());
                 cropStartY = (int) ((130.0 / 720.0) * bitmap.getHeight());
                 cropWidth = (int) ((890.0 / 1280.0) * bitmap.getWidth());
-                cropHeight = (int) ((165.0 / 720.0) * bitmap.getHeight());          // 1/29/20    Was ((165.0 / 720)    changing to ((125.0 / 720)
+                cropHeight = (int) ((125.0 / 720.0) * bitmap.getHeight());          // 1/29/20    Was ((165.0 / 720)    changing to ((125.0 / 720)
             }
 
             DbgLog.msg("9977 vuforiascan"

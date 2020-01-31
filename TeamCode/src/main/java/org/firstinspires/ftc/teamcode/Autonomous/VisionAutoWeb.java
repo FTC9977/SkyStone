@@ -23,7 +23,7 @@ import org.firstinspires.ftc.teamcode.HardwareMap.skyHardwareMap2;
 
 
 
-@Autonomous(name="AutoVisionWeb", group="csweb")
+@Autonomous(name="AutoVisionWeb", group="calebs_robot")
 
 public class VisionAutoWeb extends RobotWebcam {
 
@@ -72,14 +72,25 @@ public class VisionAutoWeb extends RobotWebcam {
 
 
 
-        pos = vuforiaStuff.vuforiascan(true, false);      // Boolean red: Flase signals we are starting in the Blue Alliance
+        pos = vuforiaStuff.vuforiascan(true, true);      // Boolean red: Flase signals we are starting in the Blue Alliance
+
+        if (pos == VuforiaStuff.skystonePos.RIGHT){
+            pos = VuforiaStuff.skystonePos.LEFT;
+
+        } else if (pos == VuforiaStuff.skystonePos.CENTER) {
+            pos = VuforiaStuff.skystonePos.CENTER;
+        } else
+            pos = VuforiaStuff.skystonePos.RIGHT;
+
+
+
         switch (pos) {
             case LEFT:
                 telemetry.addLine("Skystone position is LEFT");
                 telemetry.update();
                 //sleep(5000);
                 stoneDiff = 0;
-                stoneONE = 1;           // First Skystone is in Position 1
+                stoneONE = 3;           // First Skystone is in Position 1
                 stoneTWO = 4;           // Second Skystone is in Position 4 (2nd Left Position)
 
                 // Blinked in:  Change color Flashing GREEN to indicate we found the stone
@@ -98,7 +109,7 @@ public class VisionAutoWeb extends RobotWebcam {
                 telemetry.update();
                 sleep(500);
                 stoneDiff = 20;
-                stoneONE = 3;           // First Skystone is in Position 3
+                stoneONE = 1;           // First Skystone is in Position 3
                 stoneTWO = 6;           // Second Skystone is in Postion 6 (2nd Right Positon)
                 // Blinked in:  Change color Flashing GREEN to indicate we found the stone
                 break;
@@ -129,21 +140,21 @@ public class VisionAutoWeb extends RobotWebcam {
             DbgLog.msg("   Driving to Skystone Position 1");
             DbgLog.msg("--------------");
 
-            skystonePos1();             // Call Method to drive to position 1
+            //skystonePos1();             // Call Method to drive to position 1
 
         } else if (stoneONE == 2) {
             telemetry.addLine(" Driving to Skystone Position 2");
             DbgLog.msg("--------------");
             DbgLog.msg("   Driving to Skystone Position 2");
             DbgLog.msg("--------------");
-            skystonePos2();             // Call Method to drive to position 1
+            //skystonePos2();             // Call Method to drive to position 1
 
         } else {
             telemetry.addLine("Driving to Skystone Position 3");
             DbgLog.msg("--------------");
             DbgLog.msg("   Driving to Skystone Position 3");
             DbgLog.msg("--------------");
-            skystonePos3();             // Call Method to drive to position 3
+            //skystonePos3();             // Call Method to drive to position 3
 
          }
 
