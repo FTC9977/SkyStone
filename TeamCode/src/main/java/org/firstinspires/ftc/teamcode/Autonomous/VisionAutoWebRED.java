@@ -132,7 +132,7 @@ public class VisionAutoWebRED extends RobotWebcamRED {
             DbgLog.msg("   Driving to Skystone Position 1");
             DbgLog.msg("--------------");
 
-            //skystonePos1();             // Call Method to drive to position 1
+            skystonePos1();             // Call Method to drive to position 1
 
         } else if (stoneONE == 2) {
             telemetry.addLine(" Driving to Skystone Position 2");
@@ -294,9 +294,25 @@ public class VisionAutoWebRED extends RobotWebcamRED {
         resetAngle();
         PIDDrivebackward(.8,90,35);
     */
-
-
-
+        PIDDriveStrafeLeft(.5,90,6);
+        //resetAngle();                                             // We dont need this resetAngle() command here
+        PIDDrivebackward(.8,90,15);
+        grabStone();
+        sleep(400);
+        PIDDriveForward(.8,90,4);
+        RotateRight(.8,21);
+        PIDDrivebackward(.8,90,90);  //  Is this too far?  Can we reduce it?
+        RotateLeft(.8,20);
+        resetAngle();
+        liftStone();
+        PIDDrivebackward(.8,90 , 16);
+        lowerStone();
+        dropStone();
+        //movewaffle();
+        PIDDriveForward(.8,90,8);
+        RotateLeft(.8,20);
+        resetAngle();
+        PIDDriveForward(.8,90,45);
     }
 
 
@@ -414,6 +430,20 @@ public class VisionAutoWebRED extends RobotWebcamRED {
         //  This method will be used to grab the stone  and prepare it for delivery
         robot2.claw.setPosition(.1);
 
+
+    }
+    public void movewaffle () {
+        robot2.ArmServo1.setPosition(.1);
+        robot2.ArmServo2.setPosition(.9);
+
+        RotateRight(1, 30);
+        PIDDriveStrafeLeft(.5,90,15);
+        PIDDriveForward(.8,90,20);
+
+        robot2.ArmServo1.setPosition(.9);
+        robot2.ArmServo2.setPosition(.1);
+
+        PIDDriveStrafeRight(.5,90,17);
 
     }
 
