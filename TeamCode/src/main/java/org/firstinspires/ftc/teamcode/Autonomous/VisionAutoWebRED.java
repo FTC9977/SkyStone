@@ -301,8 +301,8 @@ public class VisionAutoWebRED extends RobotWebcamRED {
         sleep(400);
         PIDDriveForward(.8,90,4);
         RotateRight(.8,21);
-        PIDDrivebackward(.8,90,90);  //  Is this too far?  Can we reduce it?
-        RotateLeft(.8,20);
+        PIDDrivebackward(.8,90,88);  //  Is this too far?  Can we reduce it?
+        RotateLeft(.8,21);
         resetAngle();
         liftStone();
         PIDDrivebackward(.8,90 , 16);
@@ -310,7 +310,7 @@ public class VisionAutoWebRED extends RobotWebcamRED {
         dropStone();
         //movewaffle();
         PIDDriveForward(.8,90,8);
-        RotateLeft(.8,20);
+        RotateRight(.8,21);
         resetAngle();
         PIDDriveForward(.8,90,45);
     }
